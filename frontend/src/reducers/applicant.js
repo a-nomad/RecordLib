@@ -9,8 +9,8 @@ import { combineReducers } from "redux";
 const initialApplicant = {
   first_name: "",
   last_name: "",
-  date_of_birth: "",
-  date_of_death: "",
+  date_of_birth: null,
+  date_of_death: null,
   ssn: "",
   address: { line_one: "", city_state_zip: "" },
   aliases: [],
@@ -27,8 +27,6 @@ export default applicantInfoReducer;
 function aliasReducer(state = {}, action) {
   switch (action.type) {
     case ADD_OR_REPLACE_APPLICANT: {
-      console.log("ADD OR REpLACE APPLICANT with payload:");
-      console.log(action.payload);
       const callback = (acc, curr) => {
         return Object.assign(acc, curr);
       };

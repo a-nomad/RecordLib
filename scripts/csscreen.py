@@ -1,4 +1,16 @@
+"""
+Command-line interface for conducting an automated screening of a record.
+"""
 from __future__ import annotations
+from typing import List
+from datetime import datetime
+import tempfile
+import os
+import re
+import json
+import logging
+import shutil
+import requests
 import click
 from ujs_search.services.searchujs import search_by_docket, search_by_name
 from RecordLib.utilities.serializers import to_serializable
@@ -10,16 +22,6 @@ from RecordLib.sourcerecords.parsingutilities import get_text_from_pdf
 from RecordLib.analysis import Analysis
 from RecordLib.analysis import ruledefs as rd
 from RecordLib.utilities.email_builder import EmailBuilder
-from typing import Callable, Optional
-from datetime import datetime
-import tempfile
-import requests
-import os
-import re
-import json
-import logging
-import shutil
-
 
 logger = logging.getLogger(__name__)
 

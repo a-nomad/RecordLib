@@ -13,18 +13,21 @@ system-check: check-docker check-os
 
 .PHONY: build-frontend
 build-frontend:
-	 docker build -f deployment/FrontendDockerfile -t "${CONTAINER_REGISTRY}/recordlibfrontend:${CONTAINER_TAG}" ./deployment
+	docker build -f deployment/FrontendDockerfile -t "${CONTAINER_REGISTRY}/recordlibfrontend:${CONTAINER_TAG}" ./deployment
+
 
 .PHONY: build-webapp
 build-webapp:
 	rm frontend/bundles/*
 	yarn run build
-	 docker build -f deployment/DjangoDockerfile -t "${CONTAINER_REGISTRY}/recordlibdjango:${CONTAINER_TAG}" .
+	docker build -f deployment/DjangoDockerfile -t "${CONTAINER_REGISTRY}/recordlibdjango:${CONTAINER_TAG}" .
+
 
 
 .PHONY: build-db
 build-db:
-	 docker build -f deployment/PG_Dockerfile -t "${CONTAINER_REGISTRY}/recordlibdb:${CONTAINER_TAG}" ./deployment
+	docker build -f deployment/PG_Dockerfile -t "${CONTAINER_REGISTRY}/recordlibdb:${CONTAINER_TAG}" ./deployment
+
 
 build: build-frontend build-webapp build-db
 
@@ -35,7 +38,8 @@ ifeq ("","$(wildcard ./deployment/.docker.env)")
 	echo "Copying file"
 	cp .env.example ./deployment/.docker.env
 endif
-	 docker-compose -f deployment/docker-compose-pull.yml up --build
+	docker-compose -f deployment/docker-compose-pull.yml up --build
+
 
 # Start the web app as a docker compose service,
 # building the images. 
@@ -49,7 +53,8 @@ ifneq ("","$(wildcard ./frontend/bundles/*.js)")
 	rm frontend/bundles/*
 endif
 	yarn run build
-	 docker-compose -f deployment/docker-compose-build.yml up --build
+	docker-compose -f deployment/docker-compose-build.yml up --build
+
 
 # Start the docker development environment. If necessary, copy 
 # .env.example to deployment/.production.env to get things started
@@ -67,14 +72,16 @@ ifneq ("","$(wildcard ./frontend/bundles/*.js)")
 	rm frontend/bundles/*
 endif
 	yarn run build
-	 docker-compose -f deployment/docker-compose-dev.yml up --build
+	docker-compose -f deployment/docker-compose-dev.yml up --build
+
 
 # Push to a registry
 .PHONY: push
 push:
-	 docker push ${CONTAINER_REGISTRY}/recordlibfrontend:${CONTAINER_TAG}
-	 docker push ${CONTAINER_REGISTRY}/recordlibdjango:${CONTAINER_TAG}
-	 docker push ${CONTAINER_REGISTRY}/recordlibdb:${CONTAINER_TAG}
+	docker push ${CONTAINER_REGISTRY}/recordlibfrontend:${CONTAINER_TAG}
+	docker push ${CONTAINER_REGISTRY}/recordlibdjango:${CONTAINER_TAG}
+	docker push ${CONTAINER_REGISTRY}/recordlibdb:${CONTAINER_TAG}
+
 
 # deploy is used to get the newest images running on a remote host.
 # Assumes that the host is set up to receive this command. 
@@ -82,4 +89,9 @@ push:
 deploy:
 	ssh ${HOST} "cd recordlib; ./update.sh"
 
+
+.PHONY: build-push
+build-push: build push
+
+.PHONY: build-push-deploy
 build-push-deploy: build push deploy

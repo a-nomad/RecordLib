@@ -1,8 +1,8 @@
 import React from "react";
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-
-import { addSentence } from "../actions";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
+import Button from "@material-ui/core/Button";
+import { addSentence } from "frontend/src/actions";
 
 /**
  * Component for adding a Sentence to a Charge.
@@ -11,29 +11,33 @@ import { addSentence } from "../actions";
  * enter its data.
  */
 function AddSentence(props) {
-    const { adder } = props;
+  const { adder } = props;
 
-    const handleClick = () => {
-        adder();
-    }
+  const handleClick = () => {
+    adder();
+  };
 
-    return (
-        <div className="addSentence" style={{marginTop: "15px", marginBottom: "10px"}}>
-            <button type="button" style={{marginLeft: "20px"}} onClick={handleClick}>Add Sentence</button>
-        </div>
-    );
+  return (
+    <div
+      className="addSentence"
+      style={{ marginTop: "15px", marginBottom: "10px" }}
+    >
+      <Button onClick={handleClick}>Add Sentence</Button>
+    </div>
+  );
 }
 
 AddSentence.propTypes = {
-    adder: PropTypes.func.isRequired
-}
+  adder: PropTypes.func.isRequired,
+};
 
 function mapDispatchToProps(dispatch, ownProps) {
-    return { adder: () => {
-            dispatch(addSentence(ownProps.chargeId));
-        }
-    };
-};
+  return {
+    adder: () => {
+      dispatch(addSentence(ownProps.chargeId));
+    },
+  };
+}
 
 const AddSentenceWrapper = connect(null, mapDispatchToProps)(AddSentence);
 export default AddSentenceWrapper;

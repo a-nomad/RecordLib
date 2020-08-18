@@ -45,14 +45,14 @@ class SentenceLengthSerializer(S.Serializer):
 
 
 class SentenceSerializer(S.Serializer):
-    sentence_date = S.DateField()
-    sentence_type = S.CharField()
+    sentence_date = S.DateField(required=False)
+    sentence_type = S.CharField(required=False, allow_blank=True)
     sentence_period = S.CharField(required=False, allow_blank=True)
     sentence_length = SentenceLengthSerializer()
 
 
 class ChargeSerializer(S.Serializer):
-    offense = S.CharField()
+    offense = S.CharField(required=False, allow_blank=True, allow_null=True, default="")
     grade = S.CharField(required=False, allow_blank=True, allow_null=True, default="")
     statute = S.CharField(required=False, allow_blank=True, allow_null=True, default="")
     disposition = S.CharField(
@@ -64,7 +64,7 @@ class ChargeSerializer(S.Serializer):
 
 class CaseSerializer(S.Serializer):
     status = S.CharField(required=False, allow_blank=True)
-    county = S.CharField(required=False, allow_blank=True)
+    county = S.CharField(required=False, allow_blank=True, default="")
     docket_number = S.CharField(required=True)
     otn = S.CharField(required=False, allow_blank=True)
     dc = S.CharField(required=False, allow_blank=True)
@@ -93,11 +93,11 @@ class AddressSerializer(S.Serializer):
 
 
 class AttorneySerializer(S.Serializer):
-    organization = S.CharField(required=False)
-    full_name = S.CharField(required=False)
+    organization = S.CharField(required=False, default="")
+    full_name = S.CharField(required=False, default="")
     organization_address = AddressSerializer(required=False)
-    organization_phone = S.CharField(required=False)
-    bar_id = S.CharField(required=False)
+    organization_phone = S.CharField(required=False, default="")
+    bar_id = S.CharField(required=False, default="")
 
 
 class PersonSerializer(S.Serializer):
@@ -106,7 +106,7 @@ class PersonSerializer(S.Serializer):
     date_of_birth = S.DateField(required=False, allow_null=True)
     date_of_death = S.DateField(required=False, allow_null=True)
     aliases = S.ListField(
-        child=S.CharField(), required=False
+        child=S.CharField(allow_null=True), required=False,
     )  # CharField() doesn't seem to take many=True.
     ssn = S.CharField(max_length=15, required=False, allow_blank=True)
     address = AddressSerializer(required=False)
@@ -129,9 +129,11 @@ class PetitionSerializer(S.Serializer):
     ifp_message = S.CharField(required=False, allow_blank=True)
 
 
-class DocumentRenderSerializer(S.Serializer):
+class PetitionViewSerializer(S.Serializer):
     """
     Validate data involving json objects describing petitions to generate.
+
+    This serializer describes a very simple object that just has one key: `petitions`, which points to an array of PetitionSerializer objects. 
     """
 
     petitions = PetitionSerializer(many=True)

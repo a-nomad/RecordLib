@@ -25,7 +25,7 @@
  */
 
 import { normalize, denormalize, schema } from "normalizr";
-
+import { caseSchema } from "frontend/src/normalize/cases";
 export const CRECORD_ID = "root";
 
 /**
@@ -77,18 +77,6 @@ const options = {
   },
 };
 
-// Schema for the normalized CRecord.
-const sentenceSchema = new schema.Entity("sentences", {}, options);
-const chargeSchema = new schema.Entity(
-  "charges",
-  { sentences: [sentenceSchema] },
-  options
-);
-const caseSchema = new schema.Entity(
-  "cases",
-  { charges: [chargeSchema] },
-  options
-);
 //const defendantSchema = new schema.Entity('defendant', {}, options);
 //const cRecordSchema = new schema.Entity('cRecord', { defendant: defendantSchema, cases: [caseSchema]}, options);
 const cRecordSchema = new schema.Entity(
@@ -97,26 +85,12 @@ const cRecordSchema = new schema.Entity(
   options
 );
 
-export function normalizeCases(data) {
-  const caseCollection = new schema.Entity(
-    "caseCollection",
-    [caseSchema],
-    options
-  );
-  const normalized = normalize(data, caseCollection);
-  return normalized;
-}
-
 /**
  * Normalize the _cases_ of a crecord.
  * @param {} data
  */
 export function normalizeCRecord(data) {
-  console.log("normalizing");
-  console.log(data);
   const normalized = normalize(data, cRecordSchema);
-  console.log("normalized:");
-  console.log(normalized);
   return normalize(data, cRecordSchema);
 }
 
