@@ -74,34 +74,38 @@ export function login(username, password) {
   const data = new FormData();
   data.append("username", username);
   data.append("password", password);
-  client
+  return client
     .post("/api/accounts/login/", data, {
       headers: { "Content-Type": "multipart/form-data" },
     })
     .then((response) => {
-      if (response.data.username) {
-        let date = new Date();
-        date.setTime(date.getTime() + 14 * 24 * 60 * 60 * 1000);
-        document.cookie =
-          "username = " +
-          response.data.username +
-          "; expires = " +
-          date.toGMTString() +
-          "; path=/";
-      }
-
-      window.location = "/";
+      return new Promise((resolve, reject) => {
+        if (response.data.includes("didn't match")) {
+          return reject("Login failed. Try again.");
+        } else {
+          return resolve("Login succeeded.");
+        }
+      });
     });
 }
 
 export function logout() {
-  client.get("/api/accounts/logout/");
-  window.location = "/accounts/login";
-  document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+  client.get("/api/accounts/logout/").then(() => {
+    window.location = "/";
+  });
 }
 
 export function fetchUserProfileData() {
   return client.get("/api/record/profile/"); // TODO thats a bad api endpoint for a user profile.
+}
+/**
+ * PUT current user profile to the server to update it.
+ * @param {*} user
+ */
+export function saveUserProfile(user) {
+  console.log("posting profile");
+  console.log(user);
+  return client.put("/api/record/profile/", user);
 }
 
 export function searchUJSByName(first_name, last_name, date_of_birth) {

@@ -15,13 +15,28 @@ from RecordLib.crecord import Charge, Sentence, SentenceLength
 class UserSerializer(S.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "email"]
+        fields = ["username", "email", "first_name", "last_name"]
 
 
 class UserProfileSerializer(S.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ["id"]
+        fields = [
+            "id",
+            "default_atty_organization",
+            "default_atty_name",
+            "default_atty_address_line_one",
+            "default_atty_address_line_two",
+            "default_atty_phone",
+            "default_bar_id",
+        ]
+
+    default_atty_organization = S.CharField(allow_blank=True)
+    default_atty_name = S.CharField(allow_blank=True)
+    default_atty_address_line_two = S.CharField(allow_blank=True)
+    default_atty_address_line_one = S.CharField(allow_blank=True)
+    default_atty_phone = S.CharField(allow_blank=True)
+    default_bar_id = S.CharField(allow_blank=True)
 
 
 """

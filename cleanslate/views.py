@@ -21,6 +21,7 @@ from RecordLib.analysis.ruledefs import (
     seal_convictions,
 )
 from RecordLib.petitions import Expungement, Sealing
+from cleanslate.models import User, UserProfile
 from cleanslate.serializers import (
     CRecordSerializer,
     PetitionViewSerializer,
@@ -399,13 +400,45 @@ class PetitionsView(APIView):
 
 
 class UserProfileView(APIView):
+    """Information about a user's account.
+    """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        """
+        Get the currently logged in user's profile information.
+        """
+        user = User.objects.get(id=request.user.id)
+        profile = UserProfile.objects.get(user=user)
         return Response(
             {
-                "user": UserSerializer(request.user).data,
-                "profile": UserProfileSerializer(request.user).data,
+                "user": UserSerializer(user).data,
+                "profile": UserProfileSerializer(profile).data,
             }
+        )
+
+    def put(self, request):
+        """Update information about the logged in user's account."""
+
+        user = User.objects.get(id=request.user.id)
+        user_serializer = UserSerializer(user, data=request.data)
+
+        profile = UserProfile.objects.get(user=user)
+        profile_serializer = UserProfileSerializer(profile, data=request.data)
+        if user_serializer.is_valid() and profile_serializer.is_valid():
+            user_serializer.save()
+            profile_serializer.save()
+            # Should we return the user and profile here?
+            return Response({"message": "Successful update"})
+
+        return Response(
+            {
+                "errors": {
+                    "user": user_serializer.errors,
+                    "profile": profile_serializer.errors,
+                }
+            },
+            status=status.HTTP_400_BAD_REQUEST,
         )
 

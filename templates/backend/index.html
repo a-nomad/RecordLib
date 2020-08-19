@@ -3,10 +3,12 @@
 
 
 {% block content %}
+<span style="display:none"
+      id="username">{{username}}</span>
 
-    <div id="root"></div>
+<div id="root"></div>
 
 
 
-    {% replace_nonce 'home' nonce=request.csp_nonce%}
+{% replace_nonce 'home' nonce=request.csp_nonce%}
 {% endblock %}

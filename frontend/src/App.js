@@ -3,6 +3,7 @@ import CSSBaseline from "@material-ui/core/CssBaseline";
 import Navbar from "./components/Navbar";
 import About from "./pages/About";
 import UserProfile from "./pages/UserProfile";
+import EditUserProfilePage from "./pages/EditUserProfilePage";
 import NotFound from "./components/NotFound";
 import { MessagebarConnected } from "./components/Messagebar";
 import {
@@ -29,8 +30,11 @@ function App() {
             <Route path="/about">
               <About />
             </Route>
-            <Route path="/profile">
+            <Route exact path="/profile">
               <UserProfile />
+            </Route>
+            <Route exact path="/profile/edit">
+              <EditUserProfilePage />
             </Route>
             <Route path="/applicant">
               <ApplicantPage />

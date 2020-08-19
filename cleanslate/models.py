@@ -67,6 +67,13 @@ class UserProfile(models.Model):
         related_name="sealing_petition_template_user_profiles",
     )
 
+    default_atty_organization = models.CharField(max_length=200, default="")
+    default_atty_name = models.CharField(max_length=200, default="")
+    default_atty_address_line_one = models.CharField(max_length=200, default="")
+    default_atty_address_line_two = models.CharField(max_length=200, default="")
+    default_atty_phone = models.CharField(max_length=50, default="")
+    default_bar_id = models.CharField(max_length=50, default="")
+
 
 def create_profile(sender, **kwargs):
     user = kwargs["instance"]
@@ -108,6 +115,22 @@ def set_default_templates(sender, **kwargs):
 
 
 post_save.connect(set_default_templates, sender=UserProfile)
+
+
+def set_default_attorney_name(sender, **kwargs):
+    """
+    Set the default name of the attorney on a user profile to the user's own name, if 
+    nothing else is supplied.
+    """
+    profile = kwargs["instance"]
+    if kwargs["created"]:
+        if profile.default_attorney_name is None or profile.default_attorney_name == "":
+            profile.default_attorney_name = profile.get_full_name()
+
+        profile.save()
+
+
+post_save.connect(set_default_attorney_name, sender=UserProfile)
 
 
 @dataclass

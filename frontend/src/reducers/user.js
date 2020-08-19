@@ -1,15 +1,27 @@
-import { FETCH_USER_PROFILE_SUCCEEDED } from "../actions/user"
+import {
+  FETCH_USER_PROFILE_SUCCEEDED,
+  UPDATE_USER_PROFILE,
+} from "../actions/user";
 
-export default function userReducer(state={}, action) {
-    switch (action.type) {
-        case FETCH_USER_PROFILE_SUCCEEDED: 
-            return(Object.assign({}, state, {
-                username: action.payload.user.username,
-                email: action.payload.user.email,
-            }))
-        default: {
-            return state;
-        }
+const initialState = {
+  username: document.getElementById("username").textContent,
+};
+
+export default function userReducer(state = initialState, action) {
+  switch (action.type) {
+    case FETCH_USER_PROFILE_SUCCEEDED:
+      const newState = Object.assign(
+        {},
+        state,
+        { ...action.payload.user },
+        { ...action.payload.profile }
+      );
+      return newState;
+    case UPDATE_USER_PROFILE: {
+      return Object.assign({}, state, action.payload);
     }
+    default: {
+      return state;
+    }
+  }
 }
-

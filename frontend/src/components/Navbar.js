@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Typography from "@material-ui/core/Typography";
@@ -41,16 +42,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function getUserMenuLabel() {
-  const cookies = document.cookie;
-  const regex = /username=([^;]+)/;
-  const match = cookies.match(regex);
-  const userMenuLabel = match ? match[1] : "User";
-  return userMenuLabel;
-}
-
-function Navbar() {
-  const userMenuLabel = getUserMenuLabel();
+const Navbar = (props) => {
+  const { username } = props;
+  const userMenuLabel =
+    !username || username !== "" ? username : "Anonymous User";
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -180,6 +175,14 @@ function Navbar() {
       </AppBar>
     </div>
   );
-}
+};
 
-export default Navbar;
+const mapStateToProps = (state) => {
+  return {
+    username: state.user.username,
+  };
+};
+
+const NavbarConnected = connect(mapStateToProps)(Navbar);
+
+export default NavbarConnected;
