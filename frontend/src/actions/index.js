@@ -119,6 +119,13 @@ export function addSentence(chargeId) {
   };
 }
 
+export function updateAttorney(update) {
+  return {
+    type: "UPDATE_ATTORNEY",
+    payload: { update },
+  };
+}
+
 export function addAttorney(full_name) {
   const attorney = {
     id: full_name,

@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
 import Attorney from "frontend/src/components/Attorney";
 import EditAttorney from "frontend/src/components/EditAttorney";
-import { editAttorney, toggleEditingAttorney } from "frontend/src/actions";
-
+import {
+  editAttorney,
+  toggleEditingAttorney,
+  updateAttorney,
+} from "frontend/src/actions";
+import { fetchUserProfile } from "frontend/src/actions/user";
 /**
  * Connected component for a Attorney, which can be in edit mode.
  * The editing prop determines the mode.
@@ -14,15 +18,55 @@ import { editAttorney, toggleEditingAttorney } from "frontend/src/actions";
  * EditAttorney component to send changes to the redux store.
  */
 function AttorneyHolder(props) {
+  const { attorney, user, fetchUserProfile, updateAttorney } = props;
+
+  const populateAttorney = (user) => {
+    console.log("populating attorney with:");
+    const defaultAtty = {
+      address: {
+        line_one: user.default_atty_address_line_one,
+        city_state_zip: user.default_atty_address_line_two,
+      },
+      full_name: user.default_atty_name,
+      organization: user.default_atty_organization,
+      organization_phone: user.default_atty_phone,
+      bar_id: user.default_bar_id,
+    };
+    console.log(defaultAtty);
+    updateAttorney(defaultAtty);
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  useEffect(() => {
+    if (!attorney.hasBeenEdited) {
+      populateAttorney(user);
+    }
+  }, [user]);
+
   return (
     <div className="attorneyHolder">
-      {!props.editing ? <Attorney {...props} /> : <EditAttorney {...props} />}
+      {!props.attorney.editing ? (
+        <Attorney
+          modifer={props.modifier}
+          toggleEditing={props.toggleEditing}
+          {...props.attorney}
+        />
+      ) : (
+        <EditAttorney
+          modifier={props.modifier}
+          toggleEditing={props.toggleEditing}
+          {...props.attorney}
+        />
+      )}
     </div>
   );
 }
 
 function mapStateToProps(state) {
-  return state.attorney;
+  return { attorney: state.attorney, user: state.user };
 }
 
 /**
@@ -36,6 +80,8 @@ function mapDispatchToProps(dispatch, ownProps) {
       dispatch(editAttorney(key, value));
     },
     toggleEditing: () => dispatch(toggleEditingAttorney()),
+    fetchUserProfile: () => dispatch(fetchUserProfile()),
+    updateAttorney: (update) => dispatch(updateAttorney(update)),
   };
 }
 
