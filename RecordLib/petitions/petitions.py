@@ -126,25 +126,29 @@ class Expungement(Petition):
             kwargs.pop("procedure")
         else:
             self.procedure = ""
-
-        if "summary_expungement_language" in kwargs.keys():
-            self.summary_expungement_language = kwargs["summary_expungement_language"]
-            kwargs.pop("summary_expungement_language")
+        if "expungement_reasons" in kwargs.keys():
+            # expungement_reasons is text for at the end of the 'reasons for expungement section of the petittion.
+            # It may explain that the petition is for a person over 70 or for summary expungements.
+            self.expungement_reasons = kwargs["expungement_reasons"]
+            kwargs.pop("expungement_reasons")
         else:
-            self.summary_expungement_language = ""
+            self.expungement_reasons = ""
+
         super().__init__(*args, **kwargs)
         self.petition_type = "Expungement"
 
     def get_context(self):
+        """
+        Get the dictionary of values we'll pass to the docx template file.
+
+        Add any keys/values that aren't in the parent Petition class.
+        """
         ctx = super().get_context()
         ctx.update(
             {
                 "petition_type": "Expungement",
                 "petition_procedure": self.procedure,
-                "summary_extra": "EXTRA SUMMARY STUFF"
-                if self.procedure
-                == Expungement.ExpungementProcedures.SUMMARY_EXPUNGEMENT
-                else "",
+                "expungement_reasons": self.expungement_reasons,
             }
         )
         return ctx

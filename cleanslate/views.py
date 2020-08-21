@@ -321,7 +321,7 @@ class AnalysisView(APIView):
 
 
 class PetitionsView(APIView):
-    """ Create pettions and an Overview document from an Analysis.
+    """ Create petitions and an Overview document from an Analysis.
     
     POST should be a json-encoded object with an 'petitions' property that is a list of
     """
