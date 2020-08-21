@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
+import TextAreaAutosize from "@material-ui/core/TextareaAutosize";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -12,6 +13,16 @@ import {
   setServiceAgenciesOnPetition,
 } from "frontend/src/actions/petitions";
 import { pickBy, pick } from "lodash";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => {
+  root: {
+    input: {
+      paddingRight: theme.spacing(2);
+    }
+  }
+});
+
 /**
  * Form for adding a new petition
  */
@@ -31,6 +42,7 @@ export const EditPetitionForm = (props) => {
     setBarId,
     setIFPMessage,
     setCrimHistReport,
+    setExpungementReasons,
     addCaseToPetition,
     setDoneEditing,
     setServiceAgenciesOnPetition,
@@ -44,8 +56,11 @@ export const EditPetitionForm = (props) => {
     petition_type,
     ifp_message,
     include_crim_hist_report,
+    expungement_reasons,
     client = {},
   } = petition;
+
+  const classes = useStyles();
 
   const { aliases = [] } = client;
   // All the cases in the CRecord, so the user
@@ -127,6 +142,10 @@ export const EditPetitionForm = (props) => {
     setCrimHistReport(e.target.value);
   };
 
+  const handleSetExpungementReasons = (e) => {
+    setExpungementReasons(e.target.value);
+  };
+
   const handleDoneEditing = (e) => {
     setDoneEditing();
   };
@@ -146,7 +165,7 @@ export const EditPetitionForm = (props) => {
   };
 
   return (
-    <form id={`edit-petition-${id}`}>
+    <form id={`edit-petition-${id}`} className={classes.root}>
       <h3>
         Edit Petition <b>{id}</b>
       </h3>
@@ -251,15 +270,20 @@ export const EditPetitionForm = (props) => {
         </div>
         <h4>Messages</h4>
         <div>
-          <TextField
+          <TextAreaAutosize
             label="IFP Message"
             value={ifp_message || ""}
             onChange={handleSetIFPMessage}
           />
-          <TextField
+          <TextAreaAutosize
             label="Crim. Hist. report included message?"
             value={include_crim_hist_report || ""}
             onChange={handleSetCrimHistReport}
+          />
+          <TextAreaAutosize
+            label="Expungement Reasons"
+            value={expungement_reasons || ""}
+            onChange={handleSetExpungementReasons}
           />
         </div>
         <h4>Cases</h4>
@@ -403,6 +427,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(
         updatePetition(petitionId, { include_crim_hist_report: message })
       );
+    },
+    setExpungementReasons: (message) => {
+      dispatch(updatePetition(petitionId, { expungement_reasons: message }));
     },
     updateApplicant: (field, value) => {
       dispatch(updatePetition(petitionId, { client: { [field]: value } }));
