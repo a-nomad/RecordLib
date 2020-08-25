@@ -18,7 +18,7 @@ import RecordPage from "frontend/src/pages/RecordPage";
 import PetitionsPage from "frontend/src/pages/PetitionsPage";
 import Analysis from "frontend/src/pages/Analysis";
 import AttorneyPage from "frontend/src/pages/AttorneyPage";
-
+import HelpPage from "frontend/src/pages/HelpPage";
 function App() {
   return (
     <main className="content" style={{ margin: "0px" }}>
@@ -45,7 +45,7 @@ function App() {
             <Route path="/sourcerecords">
               <SourceRecords />
             </Route>
-            <Route path="/criminalrecord">
+            <Route path="/cases">
               <RecordPage />
             </Route>
             <Route path="/analysis">
@@ -53,6 +53,9 @@ function App() {
             </Route>
             <Route path="/petitions">
               <PetitionsPage />
+            </Route>
+            <Route exact path="/help">
+              <HelpPage />
             </Route>
             <Route path="/">
               <Redirect to="/applicant" />

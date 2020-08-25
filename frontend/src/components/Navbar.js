@@ -19,6 +19,10 @@ const LinkToAbout = React.forwardRef((props, ref) => (
   <RouterLink innerRef={ref} {...props} />
 ));
 
+const LinkToHelp = React.forwardRef((props, ref) => (
+  <RouterLink innerRef={ref} {...props} />
+));
+
 const LinkToHome = React.forwardRef((props, ref) => (
   <RouterLink innerRef={ref} to="/" {...props} />
 ));
@@ -111,6 +115,14 @@ const Navbar = (props) => {
           <Button
             color="primary"
             className={classes.buttonText}
+            component={LinkToHelp}
+            to="/help"
+          >
+            Help
+          </Button>
+          <Button
+            color="primary"
+            className={classes.buttonText}
             component={LinkToAbout}
             to="/about"
           >
@@ -151,7 +163,7 @@ const Navbar = (props) => {
             color="primary"
             className={classes.buttonText}
             component={RouterLink}
-            to="/criminalrecord"
+            to="/cases"
           >
             <Typography color="textSecondary"> Cases </Typography>
           </Button>

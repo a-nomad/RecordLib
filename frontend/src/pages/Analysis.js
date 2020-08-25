@@ -4,6 +4,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Container from "@material-ui/core/Container";
+import Paper from "@material-ui/core/Paper";
 import { Link as RouterLink } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import PetitionDecision from "frontend/src/components/PetitionDecision";
@@ -13,19 +14,21 @@ function Analysis(props) {
 
   return (
     <Container>
-      <h2> Analysis </h2>
-      {analysis.decisions ? (
-        <div>
-          <Button component={RouterLink} to="/petitions">
-            Get Petitions
-          </Button>
-          {analysis.decisions.map((decision, idx) => {
-            return <PetitionDecision key={idx} decision={decision} />;
-          })}
-        </div>
-      ) : (
-        <p> You should submit the record for analysis first. </p>
-      )}
+      <Paper>
+        <h2> Analysis </h2>
+        {analysis.decisions ? (
+          <div>
+            <Button component={RouterLink} to="/petitions">
+              Get Petitions
+            </Button>
+            {analysis.decisions.map((decision, idx) => {
+              return <PetitionDecision key={idx} decision={decision} />;
+            })}
+          </div>
+        ) : (
+          <p> You should submit the record for analysis first. </p>
+        )}
+      </Paper>
     </Container>
   );
 }
