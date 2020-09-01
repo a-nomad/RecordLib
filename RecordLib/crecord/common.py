@@ -13,6 +13,7 @@ import functools
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SentenceLength:
     """
@@ -33,13 +34,16 @@ class SentenceLength:
         * max_unit
         * max_time
         """
-        if isinstance(dct.get("min_time"), timedelta) and isinstance(dct.get("max_time"), timedelta):
+        if isinstance(dct.get("min_time"), timedelta) and isinstance(
+            dct.get("max_time"), timedelta
+        ):
             return SentenceLength(dct.get("min_time"), dct.get("max_time"))
         else:
             # Parse a sentencelength submitted as a pair of (time, units) tuples, like ("54", "days").
             slength = SentenceLength.from_tuples(
                 (str(dct.get("min_time")), dct.get("min_unit")),
-                (str(dct.get("max_time")), dct.get("max_unit")))
+                (str(dct.get("max_time")), dct.get("max_unit")),
+            )
             return slength
 
     @staticmethod
@@ -124,7 +128,9 @@ class Charge:
     disposition: str
     disposition_date: Optional[date] = None
     sentences: Optional[List[Sentence]] = None
-    sequence: Optional[int] = None # A charge on a docket gets a sequence number. Its like an ID for the charge, within the docket. 
+    sequence: Optional[
+        int
+    ] = None  # A charge on a docket gets a sequence number. Its like an ID for the charge, within the docket.
 
     @staticmethod
     def grade_GTE(grade_a: str, grade_b: str) -> bool:
@@ -138,21 +144,22 @@ class Charge:
         Returns: 
             True if grade_a is the same grade as or more serious than grade_b 
         """
-        grades = [
-            "", "S", "M", "IC", "M3", "M2", "M1", "F", "F3", "F2", "F1"
-        ]
+        grades = ["", "S", "M", "IC", "M3", "M2", "M1", "F", "F3", "F2", "F1"]
         try:
-            i_a = grades.index(grade_a) 
+            i_a = grades.index(grade_a)
         except ValueError:
-            logger.error(f"Couldn't understand the first grade, {grade_a}, so assuming it has low seriousness.")
+            logger.error(
+                f"Couldn't understand the first grade, {grade_a}, so assuming it has low seriousness."
+            )
             i_a = 0
         try:
             i_b = grades.index(grade_b)
         except:
-            logger.error(f"Couldn't understand the second grade, {grade_b}, so assuming it has low seriousness.")
+            logger.error(
+                f"Couldn't understand the second grade, {grade_b}, so assuming it has low seriousness."
+            )
             i_b = 0
         return i_a >= i_b
-
 
     @staticmethod
     def from_dict(dct: dict) -> Charge:
@@ -175,6 +182,7 @@ class Charge:
         how a charge proceeded through the case. When we parse a docket, if we find lots of records of 
         charges, we need to reduce them into a list where each charge only appears once.
         """
+
         def reducer(accumulator, charge):
             """
             Add charge to accumulator, if the charge is new. Otherwise combine charge with its pre-existing charge.
@@ -187,26 +195,33 @@ class Charge:
                 if isinstance(charge.sequence, int) and charge.sequence == ch.sequence:
                     ch.combine_with(charge)
                     is_new = False
-            if is_new: accumulator.append(charge)
+            if is_new:
+                accumulator.append(charge)
             return accumulator
+
         reduced = functools.reduce(reducer, charges, [])
-        return  reduced
-    
+        return reduced
+
     def combine_with(self, charge) -> Charge:
         """
         Combine this Charge with another, filling in missing info, or updating certain fields.
         """
         for attr in self.__dict__.keys():
-            if getattr(self, attr) is None and getattr(charge,attr) is not None:
-                setattr(self,attr,getattr(charge,attr))
-            elif ((isinstance(getattr(self,attr),str) and getattr(self, attr).strip() == "") and 
-                  (isinstance(getattr(charge,attr),str) and (getattr(charge,attr).strip() != ""))):
-                setattr(self,attr,getattr(charge,attr))
+            if getattr(self, attr) is None and getattr(charge, attr) is not None:
+                setattr(self, attr, getattr(charge, attr))
+            elif (
+                isinstance(getattr(self, attr), str)
+                and getattr(self, attr).strip() == ""
+            ) and (
+                isinstance(getattr(charge, attr), str)
+                and (getattr(charge, attr).strip() != "")
+            ):
+                setattr(self, attr, getattr(charge, attr))
             elif attr == "disposition":
-                if re.search(r"nolle|guilt|dismiss|withdraw",charge.disposition,re.I):
+                if re.search(r"nolle|guilt|dismiss|withdraw", charge.disposition, re.I):
                     # the new charge has a disposition that should be saved as the final disposition of this charge.
                     self.disposition = charge.disposition
-                    self.disposition_date = getattr(charge,"disposition_date",None)
+                    self.disposition_date = getattr(charge, "disposition_date", None)
 
         return self
 
@@ -243,7 +258,9 @@ class Charge:
     def get_statute_subsections(self) -> str:
         """ Get the subsection, if any, to which this charge relates
         """
-        patt = re.compile("^(?P<chapt>\d+)\s*§\s(?P<section>\d+\.?\d*)\s*§§\s*(?P<subsections>[\(\)A-Za-z0-9\.\*]+)\s*.*")
+        patt = re.compile(
+            "^(?P<chapt>\d+)\s*§\s(?P<section>\d+\.?\d*)\s*§§\s*(?P<subsections>[\(\)A-Za-z0-9\.\*]+)\s*.*"
+        )
         match = patt.match(self.statute)
         if match:
             return match.group("subsections")
@@ -254,8 +271,8 @@ class Charge:
 @dataclass
 class Address:
 
-    line_one: str
-    city_state_zip: str
+    line_one: str = ""
+    city_state_zip: str = ""
 
     @staticmethod
     def from_dict(dct: dict) -> Address:
@@ -264,3 +281,6 @@ class Address:
         except:
             return None
 
+    def __str__(self):
+        """ Readable printout of an address. """
+        return f"{self.line_one}\n{self.city_state_zip}"

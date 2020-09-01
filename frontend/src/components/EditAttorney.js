@@ -76,7 +76,7 @@ function EditAttorney(props) {
 EditAttorney.propTypes = {
   id: PropTypes.string,
   full_name: PropTypes.string,
-  organization_address: PropTypes.shape({
+  address: PropTypes.shape({
     line_one: PropTypes.string,
     city_state_zip: PropTypes.string,
   }),

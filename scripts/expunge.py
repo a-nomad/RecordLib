@@ -7,14 +7,14 @@ from RecordLib.sourcerecords.summary.pdf import parse_pdf
 from RecordLib.sourcerecords.docket.docket import Docket
 from RecordLib.crecord import CRecord
 from RecordLib.analysis import Analysis
-from RecordLib.analysis.ruledefs import * 
+from RecordLib.analysis.ruledefs import *
 from RecordLib.petitions.compressor import Compressor
 from RecordLib.crecord import Attorney
+
 
 @click.group()
 def cli():
     return
-
 
 
 @cli.command()
@@ -28,14 +28,35 @@ def cli():
 @click.option("--atty-org-phone", default="")
 @click.option("--atty-bar-id", default="")
 @click.option("--tempdir", "-td", type=click.Path(), default="tests/data/tmp")
-def dir(directory, archive, expungement_template, sealing_template, atty_name, atty_org, atty_org_addr, atty_org_phone, atty_bar_id, tempdir):
+def dir(
+    directory,
+    archive,
+    expungement_template,
+    sealing_template,
+    atty_name,
+    atty_org,
+    atty_org_addr,
+    atty_org_phone,
+    atty_bar_id,
+    tempdir,
+):
     if not os.path.exists(directory):
         print(f"The directory {directory} does not exist.")
         return
-    files = [os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    files = [
+        os.path.join(directory, f)
+        for f in os.listdir(directory)
+        if os.path.isfile(os.path.join(directory, f))
+    ]
     summaries = []
     dockets = []
-    atty = Attorney(full_name=atty_name, organization=atty_org, organization_address=atty_org_addr, organization_phone=atty_org_phone, bar_id=atty_bar_id)
+    atty = Attorney(
+        full_name=atty_name,
+        organization=atty_org,
+        address=atty_org_addr,
+        organization_phone=atty_org_phone,
+        bar_id=atty_bar_id,
+    )
     for f in files:
         print(f"  Processing {f}")
         try:
@@ -49,7 +70,7 @@ def dir(directory, archive, expungement_template, sealing_template, atty_name, a
                 summaries.append(sm)
             except:
                 print(f"    It seems {f} is neither a summary nor a docket.")
-    
+
     crec = CRecord()
     [crec.add_summary(summary) for summary in summaries]
     [crec.add_docket(docket) for docket in dockets]
@@ -63,8 +84,11 @@ def dir(directory, archive, expungement_template, sealing_template, atty_name, a
         .rule(seal_convictions)
     )
 
-    petitions = [petition for decision in analysis.decisions for petition in decision.value] 
-    for petition in petitions: petition.attorney = atty
+    petitions = [
+        petition for decision in analysis.decisions for petition in decision.value
+    ]
+    for petition in petitions:
+        petition.attorney = atty
     with open(sealing_template, "rb") as doc:
         for petition in petitions:
             if petition.petition_type == "Sealing":
@@ -75,12 +99,12 @@ def dir(directory, archive, expungement_template, sealing_template, atty_name, a
             if petition.petition_type == "Expungement":
                 petition.set_template(doc)
 
-
     petition_tuples = []
     for pt in petitions:
         petition_tuples.append((pt.file_name(), pt.render()))
     pkg = Compressor(archive, petition_tuples, tempdir=tempdir)
     pkg.save()
-    print ("*********************************")
-    print ("****** COMPLETE *****************")
-    print ("*********************************")
+    print("*********************************")
+    print("****** COMPLETE *****************")
+    print("*********************************")
+

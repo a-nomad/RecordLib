@@ -34,7 +34,7 @@ function PetitionsPage(props) {
   // to a NewPetition, and it can change independently
   // from the attorney in state.
   // ... note also the deep copy, since attorney has an address obj.
-  const defaultAttorney = { ...attorney, address: { ...attorney.address } };
+  //const defaultAttorney = { ...attorney, address: { ...attorney.address } };
 
   const styles = useStyles();
   const isReadyToSubmit = petitionIds && petitionIds.length > 0;

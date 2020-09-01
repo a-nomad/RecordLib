@@ -104,7 +104,9 @@ class Expungement(Petition):
     def from_dict(dct: dict) -> Expungement:
         dct.update(
             {
-                "attorney": Attorney.from_dict(dct["attorney"]),
+                "attorney": Attorney.from_dict(dct["attorney"])
+                if dct.get("attorney")
+                else Attorney(),
                 "client": Person.from_dict(dct["client"]),
                 "cases": [Case.from_dict(c) for c in dct["cases"]],
             }
@@ -166,4 +168,20 @@ class Sealing(Petition):
 
     def __repr__(self):
         return f"{self.petition_type}(Client: {self.client}, Cases: {[c for c in self.cases]}, Atty: {self.attorney})"
+
+    @staticmethod
+    def from_dict(dct: dict) -> Sealing:
+        """ 
+        Create a Sealing Petition from a dict with information about the petition we need to create.
+        """
+        dct.update(
+            {
+                "attorney": Attorney.from_dict(dct["attorney"])
+                if dct.get("attorney")
+                else Attorney(),
+                "client": Person.from_dict(dct["client"]),
+                "cases": [Case.from_dict(c) for c in dct["cases"]],
+            }
+        )
+        return Sealing(**dct)
 

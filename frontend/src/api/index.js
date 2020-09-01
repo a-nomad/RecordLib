@@ -123,6 +123,7 @@ export function uploadUJSDocs(source_records) {
 }
 
 export function integrateDocsWithRecord(crecord, sourceRecords) {
+  console.log("integrateDocsWithRecord action creator");
   return client.put("/api/record/cases/", {
     crecord: removeNullValues(crecord),
     source_records: removeNullValues(sourceRecords),

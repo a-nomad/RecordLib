@@ -7,9 +7,16 @@ import { searchUJSByName, uploadUJSDocs } from "../actions/ujs";
 import { Redirect } from "react-router-dom";
 
 import UJSSearchResultsContainer from "./UJSSearchResult";
+import { analyzeCRecord } from "frontend/src/actions/crecord";
 
 function NameSearch(props) {
-  const { applicant, ujsSearchResults, searchUJSByName, uploadUJSDocs } = props;
+  const {
+    applicant,
+    ujsSearchResults,
+    searchUJSByName,
+    uploadUJSDocs,
+    analyzeCRecord,
+  } = props;
   const missingSearchFields =
     applicant.first_name === "" || applicant.last_name === "";
 
@@ -21,9 +28,29 @@ function NameSearch(props) {
 
   const uploadUJSDocsClickHandler = (redirect_to) => {
     return () => {
-      uploadUJSDocs();
-      setRedirectTo(redirect_to);
+      uploadUJSDocs().then(() => {
+        setRedirectTo(redirect_to);
+      });
     };
+  };
+
+  /**
+   * User clicks the button to
+   * (1) upload selected search results as Source Records
+   * (2) update the crecord
+   * (3) analyze the crecord for petitons
+   * (4) go to the /petitions page.
+   */
+  const uploadUJSDocsAndDownloadPetitionsHandler = () => {
+    uploadUJSDocs()
+      .then(() => {
+        console.log("then analyze crecord.");
+        return analyzeCRecord();
+      })
+      .then(() => setRedirectTo("/petitions"))
+      .catch((err) => {
+        console.log("Error: " + err);
+      });
   };
 
   const anySearchedCasesSelected =
@@ -79,7 +106,7 @@ function NameSearch(props) {
             variant="contained"
             color="primary"
             disabled={!anySearchedCasesSelected}
-            onClick={uploadUJSDocsClickHandler("/petitions")}
+            onClick={uploadUJSDocsAndDownloadPetitionsHandler}
           >
             Process selected cases and download petitions.
           </Button>
@@ -119,6 +146,9 @@ function mapDispatchToProps(dispatch, ownprops) {
     },
     uploadUJSDocs: () => {
       return dispatch(uploadUJSDocs());
+    },
+    analyzeCRecord: () => {
+      return dispatch(analyzeCRecord());
     },
   };
 }

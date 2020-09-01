@@ -130,7 +130,7 @@ export function addAttorney(full_name) {
   const attorney = {
     id: full_name,
     full_name,
-    organization_address: {
+    address: {
       line_one: "",
       city_state_zip: "",
     },

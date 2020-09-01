@@ -30,7 +30,7 @@ describe("slice of state for the petitionCollection", () => {
         attorney: {
           organization: "Legal Aid Org",
           full_name: "Abraham Lincoln",
-          organization_address: {
+          address: {
             line_one: "1234 S. St.",
             city_state_zip: "Phila PA",
           },
@@ -67,12 +67,12 @@ describe("slice of state for the petitionCollection", () => {
       petitionCollection: {
         entities: {
           petitions: {
-            "0": {
+            0: {
               id: "0",
               attorney: {
                 organization: "Legal Aid Org",
                 full_name: "Abraham Lincoln",
-                organization_address: {
+                address: {
                   line_one: "1234 S. St.",
                   city_state_zip: "Phila PA",
                 },
@@ -128,12 +128,12 @@ describe("slice of state for the petitionCollection", () => {
         editingPetitionId: "0",
         entities: {
           petitions: {
-            "0": {
+            0: {
               id: "0",
               attorney: {
                 organization: "Legal Aid Org",
                 full_name: "Abraham Lincoln",
-                organization_address: {
+                address: {
                   line_one: "1234 S. St.",
                   city_state_zip: "Phila PA",
                 },
@@ -181,12 +181,12 @@ describe("slice of state for the petitionCollection", () => {
         editingPetitionId: "0",
         entities: {
           petitions: {
-            "0": {
+            0: {
               id: "0",
               attorney: {
                 organization: "Legal Aid Org",
                 full_name: "Abraham Lincoln",
-                organization_address: {
+                address: {
                   line_one: "1234 S. St.",
                   city_state_zip: "Phila PA",
                 },
@@ -239,12 +239,12 @@ describe("slice of state for the petitionCollection", () => {
         editingPetitionId: "0",
         entities: {
           petitions: {
-            "0": {
+            0: {
               id: "0",
               attorney: {
                 organization: "Legal Aid Org",
                 full_name: "Abraham Lincoln",
-                organization_address: {
+                address: {
                   line_one: "1234 S. St.",
                   city_state_zip: "Phila PA",
                 },
@@ -296,12 +296,12 @@ describe("slice of state for the petitionCollection", () => {
         editingPetitionId: "0",
         entities: {
           petitions: {
-            "0": {
+            0: {
               id: "0",
               attorney: {
                 organization: "New Org",
                 full_name: "Abraham Lincoln",
-                organization_address: {
+                address: {
                   line_one: "1234 S. St.",
                   city_state_zip: "Phila PA",
                 },

@@ -73,19 +73,65 @@ function uploadUJSDocsFinished() {
   };
 }
 
+/**
+ * Expand a set of search results from UJS into separate records
+ * for Dockets and Summaries.
+ *
+ * Like [(docket, summary)] -> {dockets: [docket], summaries: [summary]}
+ * @param {*} results
+ */
+function expandSearchResults(resultIds, cases) {
+  const docketsToSend = resultIds
+    .map((cId) => {
+      const c = cases[cId];
+      if (c.docketSelected) {
+        return {
+          caption: c.caption,
+          docket_num: c.docket_number,
+          court: c.court,
+          url: c.docket_sheet_url,
+          record_type: "DOCKET_PDF",
+        };
+      } else {
+        return null;
+      }
+    })
+    .filter((i) => i !== null);
+  const summariesToSend = resultIds
+    .map((cId) => {
+      const c = cases[cId];
+      if (c.summarySelected) {
+        return {
+          caption: c.caption,
+          docket_num: c.docket_number,
+          court: c.court,
+          url: c.summary_url,
+          record_type: "SUMMARY_PDF",
+        };
+      } else {
+        return null;
+      }
+    })
+    .filter((i) => i !== null);
+
+  return { docketsToSend, summariesToSend };
+}
+
 export function uploadUJSDocs() {
   /**
-   * Send the information about selected ujs search results to the server,
+   * A Thunk for sending the information about selected ujs search results to the
+   * server and creating SourceRecords for them.
    *
    * The server will create SourceRecords for each, and return objects describing
-   * these SoureReocrds.
+   * these SoureRecords.
    *
-   * Note that each UJS Search result described two documents. One is a 'docket', and
-   * the other is a 'summary.
+   * Note that each UJS Search result describes two documents. One is a 'docket', and
+   * the other is a 'summary'.
    *
-   * In this action, we expand these, and send them to the server as separate documents.
+   * In this action, we expand these search results, and send them to the server as separate records.
    *
-   * Then we'll also send the action to update the current crecord with the server and the
+   * Once the server responds with information identifying each new SourceRecord,
+   * we'll also send the action to update the current crecord with the server and the
    * current set of sourcerecords.
    *
    * cases.result: a list of docket numbers
@@ -97,51 +143,27 @@ export function uploadUJSDocs() {
   return (dispatch, getState) => {
     dispatch(uploadUJSDocsPending());
     const cases = getState().ujsSearchResults.casesFound;
-    const docketsToSend = cases.result
-      .map((cId) => {
-        const c = cases.entities[cId];
-        if (c.docketSelected) {
-          return {
-            caption: c.caption,
-            docket_num: c.docket_number,
-            court: c.court,
-            url: c.docket_sheet_url,
-            record_type: "DOCKET_PDF",
-          };
-        } else {
-          return null;
-        }
-      })
-      .filter((i) => i !== null);
-    const summariesToSend = cases.result
-      .map((cId) => {
-        const c = cases.entities[cId];
-        if (c.summarySelected) {
-          return {
-            caption: c.caption,
-            docket_num: c.docket_number,
-            court: c.court,
-            url: c.summary_url,
-            record_type: "SUMMARY_PDF",
-          };
-        } else {
-          return null;
-        }
-      })
-      .filter((i) => i !== null);
+    const { docketsToSend, summariesToSend } = expandSearchResults(
+      cases.result,
+      cases.entities
+    );
     const recordsToSend = docketsToSend.concat(summariesToSend);
-    api
+    return api
       .uploadUJSDocs(recordsToSend)
       .then((response) => {
         const data = response.data;
-        dispatch(upsertSourceRecords(data));
-        dispatch(updateCRecord());
-        dispatch(uploadUJSDocsFinished());
+        return dispatch(upsertSourceRecords(data));
+      })
+      .then(() => {
+        return dispatch(updateCRecord());
+      })
+      .then(() => {
+        //trying to force this to run after updateCRecord.
+        return dispatch(uploadUJSDocsFinished());
       })
       .catch((err) => {
-        console.log("error when integrating docs.");
         console.log(err);
-        dispatch(uploadUJSDocsFinished());
+        return dispatch(uploadUJSDocsFinished());
       });
   };
 }

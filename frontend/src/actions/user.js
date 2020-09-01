@@ -20,14 +20,15 @@ export const updateUserProfile = (field, newValue) => {
 
 export function fetchUserProfile() {
   return (dispatch) => {
-    api
+    return api
       .fetchUserProfileData()
       .then((response) => {
         const data = response.data;
-        dispatch(fetchUserProfileSucceeded(data));
+        console.log("returning dispatch of fetchUserProfileSucceeded`.");
+        return dispatch(fetchUserProfileSucceeded(data));
       })
       .catch((err) => {
-        dispatch(newMessage({ msgText: err, severity: "error" }));
+        return dispatch(newMessage({ msgText: err, severity: "error" }));
       });
   };
 }
@@ -40,12 +41,12 @@ export function saveUserProfile(user) {
     api
       .saveUserProfile(user)
       .then((response) => {
-        dispatch(
+        return dispatch(
           newMessage({ msgText: "User info updated.", severity: "success" })
         );
       })
       .catch((err) => {
-        dispatch(newMessage({ msgText: err, severity: "error" }));
+        return dispatch(newMessage({ msgText: err, severity: "error" }));
       });
   };
 }

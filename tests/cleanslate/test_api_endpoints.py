@@ -139,7 +139,7 @@ def test_download_petition(admin_client, admin_user, example_case):
                 "attorney": {
                     "organization": "Legal Aid Org",
                     "full_name": "Abraham Lincoln",
-                    "organization_address": {
+                    "address": {
                         "line_one": "1234 S. St.",
                         "city_state_zip": "Phila PA",
                     },
@@ -179,7 +179,7 @@ def test_petition_endpoint_strips_none_values(admin_client, admin_user, example_
                 "attorney": {
                     "organization": "Legal Aid Org",
                     "full_name": "Abraham Lincoln",
-                    "organization_address": {
+                    "address": {
                         "line_one": "1234 S. St.",
                         "city_state_zip": "Phila PA",
                     },

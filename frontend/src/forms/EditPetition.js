@@ -270,17 +270,27 @@ export const EditPetitionForm = (props) => {
         </div>
         <h4>Messages</h4>
         <div>
+          <InputLabel for="ifp_message">IFP Message</InputLabel>
           <TextAreaAutosize
+            id="ifp_message"
             label="IFP Message"
             value={ifp_message || ""}
             onChange={handleSetIFPMessage}
           />
+          <InputLabel for="include_crim_hist_report">
+            Criminal History Report Message
+          </InputLabel>
           <TextAreaAutosize
+            id="include_crim_hist_report"
             label="Crim. Hist. report included message?"
             value={include_crim_hist_report || ""}
             onChange={handleSetCrimHistReport}
           />
+          <InputLabel for="expungement_reasons">
+            Reasons for expungement
+          </InputLabel>
           <TextAreaAutosize
+            id="expungement_reasons"
             label="Expungement Reasons"
             value={expungement_reasons || ""}
             onChange={handleSetExpungementReasons}
@@ -399,14 +409,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     setStreetAddress: (newAddress) => {
       dispatch(
         updatePetition(petitionId, {
-          attorney: { organization_address: { line_one: newAddress } },
+          attorney: { address: { line_one: newAddress } },
         })
       );
     },
     setCity: (newCity) => {
       dispatch(
         updatePetition(petitionId, {
-          attorney: { organization_address: { city_state_zip: newCity } },
+          attorney: { address: { city_state_zip: newCity } },
         })
       );
     },

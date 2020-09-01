@@ -12,7 +12,7 @@ describe("normaizing and denormalizing a list of petitions.", () => {
       attorney: {
         organization: "Legal Aid Org",
         full_name: "Abraham Lincoln",
-        organization_address: {
+        address: {
           line_one: "1234 S. St.",
           city_state_zip: "Phila PA",
         },
@@ -65,12 +65,12 @@ describe("normaizing and denormalizing a list of petitions.", () => {
           },
         },
         petitions: {
-          "1": {
+          1: {
             id: "1",
             attorney: {
               organization: "Legal Aid Org",
               full_name: "Abraham Lincoln",
-              organization_address: {
+              address: {
                 line_one: "1234 S. St.",
                 city_state_zip: "Phila PA",
               },
@@ -104,7 +104,7 @@ describe("denormalizing petitions", () => {
       attorney: {
         organization: "Legal Aid Org",
         full_name: "Abraham Lincoln",
-        organization_address: {
+        address: {
           line_one: "1234 S. St.",
           city_state_zip: "Phila PA",
         },
@@ -163,12 +163,12 @@ describe("denormalizing petitions", () => {
               },
             },
             petitions: {
-              "1": {
+              1: {
                 id: "1",
                 attorney: {
                   organization: "Legal Aid Org",
                   full_name: "Abraham Lincoln",
-                  organization_address: {
+                  address: {
                     line_one: "1234 S. St.",
                     city_state_zip: "Phila PA",
                   },

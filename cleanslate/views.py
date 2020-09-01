@@ -317,7 +317,7 @@ class AnalysisView(APIView):
             )
         except Exception as err:
             logger.error(err)
-            return Response("Something went wrong", status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PetitionsView(APIView):

@@ -14,7 +14,7 @@
 export const UPSERT_SOURCE_RECORDS = "UPSERT_SOURCE_RECORDS";
 
 /**
- * Insert or update source records
+ * Insert or update source records into State.
  */
 export function upsertSourceRecords(sourceRecords) {
   return {

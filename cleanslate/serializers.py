@@ -110,7 +110,7 @@ class AddressSerializer(S.Serializer):
 class AttorneySerializer(S.Serializer):
     organization = S.CharField(required=False, default="")
     full_name = S.CharField(required=False, default="")
-    organization_address = AddressSerializer(required=False)
+    address = AddressSerializer(required=False)
     organization_phone = S.CharField(required=False, default="")
     bar_id = S.CharField(required=False, default="")
 
@@ -133,7 +133,7 @@ class CRecordSerializer(S.Serializer):
 
 
 class PetitionSerializer(S.Serializer):
-    attorney = AttorneySerializer()
+    attorney = AttorneySerializer(required=False)
     client = PersonSerializer()
     cases = CaseSerializer(many=True)
     expungement_type = S.CharField(required=False)

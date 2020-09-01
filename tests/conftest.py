@@ -30,7 +30,7 @@ def example_attorney(example_attorney_address):
     return Attorney(
         organization="Community Legal",
         full_name="John Smith",
-        organization_address=example_attorney_address,
+        address=example_attorney_address,
         organization_phone="555-555-5555",
         bar_id="123456",
     )

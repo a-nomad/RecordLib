@@ -21,7 +21,6 @@ function AttorneyHolder(props) {
   const { attorney, user, fetchUserProfile, updateAttorney } = props;
 
   const populateAttorney = (user) => {
-    console.log("populating attorney with:");
     const defaultAtty = {
       address: {
         line_one: user.default_atty_address_line_one,
@@ -32,7 +31,6 @@ function AttorneyHolder(props) {
       organization_phone: user.default_atty_phone,
       bar_id: user.default_bar_id,
     };
-    console.log(defaultAtty);
     updateAttorney(defaultAtty);
   };
 

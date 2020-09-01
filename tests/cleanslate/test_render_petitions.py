@@ -34,7 +34,7 @@ def test_download_petition(admin_user, admin_client, example_case):
                 "attorney": {
                     "organization": "Legal Aid Org",
                     "full_name": "Abraham Lincoln",
-                    "organization_address": {
+                    "address": {
                         "line_one": "1234 S. St.",
                         "city_state_zip": "Phila PA",
                     },
