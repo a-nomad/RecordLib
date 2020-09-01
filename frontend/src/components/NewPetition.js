@@ -33,13 +33,22 @@ export const NewPetitionForm = (props) => {
   } = props;
   const [showEditForm, setShowEditForm] = useState(editingPetitionId !== null);
 
+  const defaultIFPMessage = `${
+    defaultAttorney.organization || "____"
+  } is a non-profit legal services organization that provides free legal assistance to low-income individuals. I, ${
+    defaultAttorney.full_name
+  }, attorney for the Petitioner, certify that Petitioner meets the financial eligibility standards for representation by ${
+    defaultAttorney.organization
+  } and that I am providing free legal service to Petitioner.`;
+
   const handleButtonClick = () => {
     const newPetitionId = generatePetitionId(petitionIds);
     newPetition(
       newPetitionId,
       defaultAttorney,
       defaultServiceAgencies,
-      defaultApplicantInfo
+      defaultApplicantInfo,
+      defaultIFPMessage
     );
     setShowEditForm(true);
   };
@@ -78,7 +87,8 @@ const mapDispatchToProps = (dispatch) => {
       newId,
       defaultAttorney,
       defaultServiceAgencies,
-      defaultApplicantInfo
+      defaultApplicantInfo,
+      defaultIFPMessage
     ) => {
       const aliases = Object.entries(defaultApplicantInfo.aliases).map(
         ([id, alias]) => alias
@@ -93,6 +103,7 @@ const mapDispatchToProps = (dispatch) => {
             ...defaultApplicantInfo.applicant,
             aliases: aliases,
           },
+          ifp_message: defaultIFPMessage,
         })
       );
     },

@@ -81,11 +81,25 @@ export function analyzeCRecord() {
         const action = analyzeRecordsSucceeded(analysis);
         dispatch(action);
         console.log(analysis);
+
+        const atty = getState().attorney;
+
+        const defaultIFPMessage = `${
+          atty.organization || "____"
+        } is a non-profit legal services organization that provides free legal assistance to low-income individuals. I, ${
+          atty.full_name
+        }, attorney for the Petitioner, certify that Petitioner meets the financial eligibility standards for representation by ${
+          atty.organization
+        } and that I am providing free legal service to Petitioner.`;
+
         analysis.decisions.forEach((decision) =>
           decision.value.forEach((petition) => {
             dispatch(
               newPetition(
-                merge({}, petition, { attorney: getState().attorney })
+                merge({}, petition, {
+                  attorney: atty,
+                  ifp_message: defaultIFPMessage,
+                })
               )
             );
           })
