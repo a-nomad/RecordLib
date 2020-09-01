@@ -67,12 +67,19 @@ class UserProfile(models.Model):
         related_name="sealing_petition_template_user_profiles",
     )
 
-    default_atty_organization = models.CharField(max_length=200, default="")
-    default_atty_name = models.CharField(max_length=200, default="")
-    default_atty_address_line_one = models.CharField(max_length=200, default="")
-    default_atty_address_line_two = models.CharField(max_length=200, default="")
-    default_atty_phone = models.CharField(max_length=50, default="")
-    default_bar_id = models.CharField(max_length=50, default="")
+    default_atty_organization = models.CharField(max_length=200, default="", blank=True)
+    default_atty_name = models.CharField(max_length=200, default="", blank=True)
+    default_atty_address_line_one = models.CharField(
+        max_length=200, default="", blank=True
+    )
+    default_atty_address_line_two = models.CharField(
+        max_length=200, default="", blank=True
+    )
+    default_atty_phone = models.CharField(max_length=50, default="", blank=True)
+    default_bar_id = models.CharField(max_length=50, default="", blank=True)
+
+    def get_full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}".strip()
 
 
 def create_profile(sender, **kwargs):
@@ -124,8 +131,8 @@ def set_default_attorney_name(sender, **kwargs):
     """
     profile = kwargs["instance"]
     if kwargs["created"]:
-        if profile.default_attorney_name is None or profile.default_attorney_name == "":
-            profile.default_attorney_name = profile.get_full_name()
+        if profile.default_atty_name is None or profile.default_atty_name == "":
+            profile.default_atty_name = profile.get_full_name()
 
         profile.save()
 
