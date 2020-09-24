@@ -13,6 +13,7 @@ from RecordLib.crecord import CRecord
 from RecordLib.sourcerecords import SourceRecord as RLSourceRecord
 from RecordLib.analysis import Analysis
 from RecordLib.utilities.serializers import to_serializable
+from RecordLib.utilities import cleanslate_screen
 from RecordLib.analysis.ruledefs import (
     expunge_summary_convictions,
     expunge_nonconvictions,
@@ -31,6 +32,7 @@ from cleanslate.serializers import (
     IntegrateSourcesSerializer,
     SourceRecordSerializer,
     DownloadDocsSerializer,
+    AutoScreeningSerializer,
 )
 from cleanslate.compressor import Compressor
 from cleanslate.services import download as download_service
@@ -441,4 +443,22 @@ class UserProfileView(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class AutoScreeningView(APIView):
+    """
+    Trigger an automated screening of a person's record.
+    """
+
+    def post(self, request):
+        """
+        Receive a name, dob, and email address, and send an automated review of a person's public record
+        to the email address.
+        """
+        screening_request = AutoScreeningSerializer(data=request.data)
+        if screening_request.is_valid():
+            cleanslate_screen.by_name(**screening_request.validated_data)
+            return Response({"screening complete"})
+        else:
+            return Response({"errors": screening_request.errors})
 

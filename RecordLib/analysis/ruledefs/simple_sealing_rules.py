@@ -43,7 +43,8 @@ def no_danger_to_person_offense(
 
     A charge is not eligible for sealing if it is a conviction for an Article B of Part II (danger to the person)
 
-    TODO currently sealing functions don't evaluate the time requirements (penalty_limit or within_years). B/C charges don't know when they happened.
+    TODO currently sealing functions don't evaluate the penalty_limit 
+        B/C charges don't know their maximum possible term of imprisonment 
 
     Args:
         item: A criminal record or a single Charge
@@ -53,6 +54,12 @@ def no_danger_to_person_offense(
     """
     # Suppose `item` is a whole Record.
     try:
+        cases_within_years = [
+            c
+            for c in item.cases
+            if c.arrest_date
+            and relativedelta(date.today(), c.arrest_date).years < within_years
+        ]
         decision = Decision(
             name="No convictions in the record for article B offenses, felonies or punishable by more than 7 years, in the last 20 years.",
             reasoning=[
@@ -62,7 +69,7 @@ def no_danger_to_person_offense(
                     penalty_limit=penalty_limit,
                     conviction_limit=conviction_limit,
                 )
-                for case in item.cases
+                for case in cases_within_years
                 for charge in case.charges
             ],
         )

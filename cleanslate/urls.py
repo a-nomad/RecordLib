@@ -10,6 +10,7 @@ from .views import (
     AnalysisView,
     PetitionsView,
     UserProfileView,
+    AutoScreeningView,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path("analysis/", AnalysisView.as_view()),
     path("petitions/", PetitionsView.as_view()),
     path("profile/", UserProfileView.as_view()),
+    path("screening/", AutoScreeningView.as_view()),
 ]

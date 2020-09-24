@@ -127,6 +127,17 @@ class PersonSerializer(S.Serializer):
     address = AddressSerializer(required=False)
 
 
+class AutoScreeningSerializer(S.Serializer):
+    """
+    Required elements for an auto-screening for expungements/sealings.
+    """
+
+    first_name = S.CharField(max_length=200, allow_blank=False)
+    last_name = S.CharField(max_length=200, allow_blank=False)
+    dob = S.DateField(required=True)
+    email = S.EmailField(required=True)
+
+
 class CRecordSerializer(S.Serializer):
     person = PersonSerializer()
     cases = CaseSerializer(many=True)
