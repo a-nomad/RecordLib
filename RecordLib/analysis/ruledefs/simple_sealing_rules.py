@@ -58,7 +58,8 @@ def no_danger_to_person_offense(
             c
             for c in item.cases
             if c.arrest_date
-            and relativedelta(date.today(), c.arrest_date).years < within_years
+            and relativedelta(date.today(), c.arrest_date).years
+            < within_years  # not sure if this needs to be <=
         ]
         decision = Decision(
             name="No convictions in the record for article B offenses, felonies or punishable by more than 7 years, in the last 20 years.",
