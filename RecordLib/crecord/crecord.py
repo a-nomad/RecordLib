@@ -6,14 +6,14 @@ Note - it looks like i can't use dataclasses throughout because
        what's the point?
 """
 from __future__ import annotations
-from typing import List
-from .common import Charge
+from typing import List, Optional
+from dataclasses import asdict
+from dateutil.relativedelta import relativedelta
+from datetime import date
+import logging
+from RecordLib.sourcerecords.docket import Docket
 from .person import Person
 from .case import Case
-from dataclasses import asdict
-from datetime import date
-from dateutil.relativedelta import relativedelta
-import logging
 
 
 def years_since_last_arrested_or_prosecuted(crecord: CRecord) -> int:
@@ -36,7 +36,7 @@ def years_since_last_arrested_or_prosecuted(crecord: CRecord) -> int:
     last_case = cases_ordered[-1]
     try:
         return relativedelta(date.today(), last_case.last_action()).years
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         return 0
 
 
@@ -69,6 +69,9 @@ class CRecord:
 
     @staticmethod
     def from_dict(dct: dict) -> Optional[CRecord]:
+        """
+        Create a CRecord from a dict representation of one.
+        """
         try:
             try:
                 person = Person.from_dict(dct["person"])
@@ -84,7 +87,6 @@ class CRecord:
 
     person: Person
     cases: List[Case]
-    validator: cb.Validator
 
     years_since_last_arrested_or_prosecuted = years_since_last_arrested_or_prosecuted
 
