@@ -1,8 +1,10 @@
-
-
 from RecordLib.analysis import ruledefs
 from RecordLib.analysis.ruledefs.simple_sealing_rules import (
-    not_felony1, fines_and_costs_paid, is_misdemeanor_or_ungraded)
+    not_felony1,
+    fines_and_costs_paid,
+    is_misdemeanor_or_ungraded,
+    no_danger_to_person_offense,
+)
 from RecordLib.crecord import Sentence, SentenceLength
 from RecordLib.crecord import Case
 from RecordLib.utilities.serializers import to_serializable
@@ -12,15 +14,18 @@ import pytest
 import types
 import copy
 
+
 def test_rule_expunge_over_70(example_crecord):
     example_crecord.person.date_of_birth = date(1920, 1, 1)
     example_crecord.cases[0].arrest_date = date(1970, 1, 1)
-    example_crecord.cases[0].charges[0].sentences = [Sentence(
-        sentence_date=date.today(),
-        sentence_type="Confinement",
-        sentence_period="90 days",
-        sentence_length=SentenceLength.from_tuples(("90","day"), ("90","day"))
-    )]
+    example_crecord.cases[0].charges[0].sentences = [
+        Sentence(
+            sentence_date=date.today(),
+            sentence_type="Confinement",
+            sentence_period="90 days",
+            sentence_length=SentenceLength.from_tuples(("90", "day"), ("90", "day")),
+        )
+    ]
     remaining_recordord, analysis = ruledefs.expunge_over_70(example_crecord)
     assert analysis.value == []
     assert [bool(d) for d in analysis.reasoning] == [True, True, False]
@@ -30,7 +35,7 @@ def test_rule_expunge_over_70(example_crecord):
         sentence_date=date(1980, 1, 1),
         sentence_type="Confinement",
         sentence_period="90 days",
-        sentence_length=SentenceLength.from_tuples(("90", "day"), ("90", "day"))
+        sentence_length=SentenceLength.from_tuples(("90", "day"), ("90", "day")),
     )
     remaining_recordord, analysis = ruledefs.expunge_over_70(example_crecord)
     assert isinstance(analysis.value[0], Expungement)
@@ -68,12 +73,14 @@ def test_expunge_summary_convictions(example_crecord, example_charge):
     example_crecord.cases[0].charges.append(new_charge)
     assert len(example_crecord.cases[0].charges) == 2
 
-    mod_rec, analysis = ruledefs.expunge_summary_convictions(
-        example_crecord)
+    mod_rec, analysis = ruledefs.expunge_summary_convictions(example_crecord)
     assert len(analysis.value) == 1
     assert len(mod_rec.cases) == 1
 
-@pytest.mark.parametrize("disp", [(""), ("Nolle Prossed"), ("Withdrawn"), ("Not Guilty")])
+
+@pytest.mark.parametrize(
+    "disp", [(""), ("Nolle Prossed"), ("Withdrawn"), ("Not Guilty")]
+)
 def test_expunge_nonconvictions(example_crecord, example_charge, disp):
     example_crecord.cases[0].charges[0].disposition = disp
     mod_rec, analysis = ruledefs.expunge_nonconvictions(example_crecord)
@@ -81,3 +88,19 @@ def test_expunge_nonconvictions(example_crecord, example_charge, disp):
     assert len(mod_rec.cases) == 0
 
 
+@pytest.mark.parametrize(
+    "statute,grade,value", [("18 § 2709", "S", True), ("18 § 2709", "", False)]
+)  # TRUE means a statute should _not_ be considered an arb b offense
+# FALSE means the statue IS an art. b offense, so excluded from sealing.
+def test_art_b_danger_to_person_offenses(example_charge, statute, grade, value):
+    """
+    Check the decisionmaking about whether a statute is an article B offense-to-person offense.
+    
+    Notes. 
+      Only Art. B offenses with possible terms of imprisonment longer than two years.
+      18 s. 9122.1(b) 
+    """
+    example_charge.statute = statute
+    example_charge.grade = grade
+    res = no_danger_to_person_offense(example_charge, 10, 20, 1)
+    assert res.value == value

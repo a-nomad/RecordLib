@@ -43,8 +43,10 @@ def no_danger_to_person_offense(
 
     A charge is not eligible for sealing if it is a conviction for an Article B of Part II (danger to the person)
 
-    TODO currently sealing functions don't evaluate the penalty_limit 
-        B/C charges don't know their maximum possible term of imprisonment 
+    The law doesn't include Art. B offenses if the maximum length of imprisonment is less than two years. This
+    equates to an M1. So an Art. B offense less serious than an M1 doesn't count as an Offense Against the Person
+    under this rule. 
+
 
     Args:
         item: A criminal record or a single Charge
@@ -77,7 +79,9 @@ def no_danger_to_person_offense(
         decision.value = all(decision.reasoning)
     except AttributeError:
         # `item` is probably a charge.
-        decision = Decision(name="Is this not a conviction for an Article B offense")
+        decision = Decision(
+            name="Is this not a conviction for an Article B offense (M1 or more serious)?"
+        )
         try:
             if (
                 item.get_statute_chapter() == 18
@@ -85,10 +89,17 @@ def no_danger_to_person_offense(
                 and item.get_statute_section() < 3300
                 and item.is_conviction()
             ):
-                decision.value = False
-                decision.reasoning = (
-                    f"Statute {item.statute} is an Article B conviction"
-                )
+                if Charge.grade_GTE(item.grade, "M1"):
+                    decision.value = False
+                    decision.reasoning = f"Statute {item.statute} is an Article B conviction, with a grade of at least M1."
+                elif item.grade.strip() == "":
+                    # The grade is missing, and otherwise this is an excluded offense.
+                    decision.value = False
+                    decision.reasoning = f"Statute {item.statute} is an Article B conviction, but we do not know the grade. It may or may not be an excluded offense."
+                else:
+                    decison.value = True
+                    decison.reasoning = f"Statute {item.statute} appears not to be an Article B conviction."
+
             else:
                 decison.value = True
                 decison.reasoning = (

@@ -143,6 +143,10 @@ class Charge:
         
         Returns: 
             True if grade_a is the same grade as or more serious than grade_b 
+        
+        Examples:
+            grade_GTE("M1", "S") == True
+            grade_GTE("S","") == False
         """
         grades = ["", "S", "M", "IC", "M3", "M2", "M1", "F", "F3", "F2", "F1"]
         try:
