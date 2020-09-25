@@ -1,7 +1,6 @@
 """
 Automated clean slate screening.
 """
-from datetime import datetime
 import logging
 import tempfile
 from typing import List

@@ -7,11 +7,10 @@ Note - it looks like i can't use dataclasses throughout because
 """
 from __future__ import annotations
 from typing import List, Optional
-from dataclasses import asdict
-from dateutil.relativedelta import relativedelta
-from datetime import date
 import logging
-from RecordLib.sourcerecords.docket import Docket
+from dataclasses import asdict
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from .person import Person
 from .case import Case
 
@@ -154,7 +153,7 @@ class CRecord:
 
         return self
 
-    def add_docket(self: CRecord, docket: Docket) -> CRecord:
+    def add_docket(self: CRecord, docket: "Docket") -> CRecord:
         """
         Add a docket to this criminal record and return the record.
 
@@ -192,6 +191,7 @@ class CRecord:
         appears to be a different person, then the new Person will or will not be overwritten in this 
         Record. If the CRecord has no person attribute, then the Person from the source record will be
         added to this record regardless of this param.
+
 
         Args:
             sourcerecord (SourceRecord): A parsed sourcerecord

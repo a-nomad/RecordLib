@@ -1,11 +1,14 @@
 from __future__ import annotations
-from RecordLib.crecord import Person
-from RecordLib.crecord import Case
 from typing import Union, BinaryIO, List, Tuple
+from RecordLib.crecord import Person, Case
 from RecordLib.sourcerecords.docket.re_parse_pdf import re_parse_pdf
 
 
 class Docket:
+    """
+    Representation of the docket in a case in PA.
+    """
+
     @staticmethod
     def from_pdf(pdf: Union[BinaryIO, str]) -> Tuple[Docket, List[str]]:
         """ Create a Docket from a pdf file. """
