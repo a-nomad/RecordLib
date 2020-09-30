@@ -1,16 +1,24 @@
 from __future__ import annotations
 import uuid
 import re
+import logging
 from typing import Optional
 from dataclasses import dataclass, asdict
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models.signals import post_save
+from RecordLib.sourcerecords.parsingutilities import get_text_from_pdf
 from RecordLib.sourcerecords.docket.re_parse_pdf import (
     re_parse_pdf as docket_pdf_parser,
+    re_parse_pdf_text as docket_text_parser,
 )
-from RecordLib.sourcerecords.summary.parse_pdf import parse_pdf as summary_pdf_parser
+from RecordLib.sourcerecords.summary.parse_pdf import (
+    parse_pdf as summary_pdf_parser,
+    parse_text as summary_text_parser,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentTemplate(models.Model):
@@ -148,28 +156,50 @@ class SourceRecordFileInfo:
     url: str = ""
     record_type: str = ""
     fetch_status: str = ""
+    raw_text: str = ""
 
 
-def source_record_info(filename: str):
+def source_record_info(a_file):
     """
-    TODO what is this method for?
+    Attempt to figure out basic information about what a source record relates to. 
     """
+    filename = a_file.name
     file_info = SourceRecordFileInfo()
-    if re.search("pdf$", filename, re.IGNORECASE):
-        if re.search("summary", filename, re.IGNORECASE):
-            file_info.record_type = SourceRecord.RecTypes.SUMMARY_PDF
-        elif re.search("docket", filename, re.IGNORECASE):
-            file_info.record_type = SourceRecord.RecTypes.DOCKET_PDF
+    try:
+        file_info.raw_text = get_text_from_pdf(a_file)
+    except Exception:
+        pass
 
-        if re.search("CP", filename):
-            file_info.court = SourceRecord.Courts.CP
-        elif re.search("MD", filename):
-            file_info.court = SourceRecord.Courts.MDJ
+    # caption
+    #  this is hard to get w/out parsing a lot.
 
-        file_info.fetch_status = SourceRecord.FetchStatuses.FETCHED
-        return file_info
-    else:
-        return None
+    # record type
+    if re.search("docket", file_info.raw_text, re.IGNORECASE):
+        file_info.record_type = SourceRecord.RecTypes.DOCKET_PDF
+    elif re.search("summary", file_info.raw_text, re.IGNORECASE):
+        file_info.record_type = SourceRecord.RecTypes.SUMMARY_PDF
+
+    # fetch status
+    file_info.fetch_status = SourceRecord.FetchStatuses.FETCHED
+
+    # docket_number
+    docket_numbers = re.findall(r"(?P<docket_num>(?:\w+\-)+\d{4})", file_info.raw_text)
+
+    if len(docket_numbers) < 1:
+        logger.warning("Could not find docket number for doc %s", a_file.name)
+
+    if file_info.record_type == SourceRecord.RecTypes.SUMMARY_PDF:
+        file_info.docket_num = f"Summary({', '.join(docket_numbers)})"
+    elif file_info.record_type == SourceRecord.RecTypes.DOCKET_PDF:
+        file_info.docket_num = docket_numbers[0]
+
+    # court
+    if re.search("CP", filename):
+        file_info.court = SourceRecord.Courts.CP
+    elif re.search("MJ", filename):
+        file_info.court = SourceRecord.Courts.MDJ
+
+    return file_info
 
 
 class SourceRecord(models.Model):
@@ -189,9 +219,10 @@ class SourceRecord(models.Model):
     def from_unknown_file(
         cls, a_file: InMemoryUploadedFile, **kwargs
     ) -> Optional[SourceRecord]:
-        """ Create a SourceRecord from an uploaded file, or return None if we cannot tell what the file is. """
+        """ Create a SourceRecord from an uploaded file, or return None if we cannot tell what the file is.
+        """
         try:
-            file_info = source_record_info(a_file.name)
+            file_info = source_record_info(a_file)
             if file_info:
                 return cls(**asdict(file_info), file=a_file, **kwargs)
             else:
@@ -225,10 +256,17 @@ class SourceRecord(models.Model):
 
         Based on the record_type of this SourceRecord, identify the parser it should use.
         """
-        return {
-            "SUMMARY_PDF": summary_pdf_parser,
-            "DOCKET_PDF": docket_pdf_parser,
-        }.get(self.record_type)
+        if self.record_type == SourceRecord.RecTypes.SUMMARY_PDF:
+            if self.raw_text:
+                return summary_text_parser
+            else:
+                return summary_pdf_parser
+        else:
+            # this is a docket, I hope.
+            if self.raw_text:
+                return docket_text_parser
+            else:
+                return docket_pdf_parser
 
     class FetchStatuses:
         """
@@ -290,3 +328,5 @@ class SourceRecord(models.Model):
     file = models.FileField(null=True)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    raw_text = models.TextField(null=True)

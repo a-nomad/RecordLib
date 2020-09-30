@@ -116,8 +116,12 @@ class AttorneySerializer(S.Serializer):
 
 
 class PersonSerializer(S.Serializer):
-    first_name = S.CharField(max_length=200, allow_blank=True)
-    last_name = S.CharField(max_length=200, allow_blank=True)
+    first_name = S.CharField(
+        max_length=200, allow_blank=True, required=False, default=""
+    )
+    last_name = S.CharField(
+        max_length=200, allow_blank=True, required=False, default=""
+    )
     date_of_birth = S.DateField(required=False, allow_null=True)
     date_of_death = S.DateField(required=False, allow_null=True)
     aliases = S.ListField(

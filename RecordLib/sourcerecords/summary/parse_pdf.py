@@ -482,11 +482,15 @@ md_processors = {
 
 
 def parse_pdf(pdf: Union[BinaryIO, str]) -> Tuple[Person, List[Case], List[str]]:
+    text = get_text_from_pdf(pdf)
+    return parse_text(text)
+
+
+def parse_text(text: str) -> Tuple[Person, List[Case], List[str]]:
     """
     PEGParser-based parser method that can take a CP or MD source and return a Summary
     used to build a CRecord.
     """
-    text = get_text_from_pdf(pdf)
     inputs_dictionary = get_processors(text)
     summary_page_grammar = inputs_dictionary["summary_page_grammar"]
     errors = []

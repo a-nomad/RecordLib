@@ -126,7 +126,7 @@ def integrate_dockets(
             # get a RecordLib SourceRecord from the webapp sourcerecord model. The RecordLib SourceRecord has the machinery for
             # parsing the record to get a Person and Cases out of it.
             rlsource = RLSourceRecord(
-                docket_source_record.file.path,
+                docket_source_record.raw_text or docket_source_record.file.path,
                 parser=docket_source_record.get_parser(),
             )
             # If we reach this line, the parse succeeded.
@@ -166,7 +166,7 @@ def integrate_summaries(
     for summary_source_record in summary_source_records:
         try:
             rlsource = RLSourceRecord(
-                summary_source_record.file.path,
+                summary_source_record.raw_text or summary_source_record.file.path,
                 parser=summary_source_record.get_parser(),
             )
             summary_source_record.parse_status = SourceRecord.ParseStatuses.SUCCESS
