@@ -115,7 +115,8 @@ def no_danger_to_person_offense(
 def ten_years_since_last_conviction(crecord: CRecord) -> Decision:
     """
     Person is not eligible for sealing unless they have been "free from conviction
-    for a period of 10 years" 18 Pa C.S. § 9122.1(a)
+    for a period of 10 years" 18 Pa C.S. § 9122.1(a). Only convictions for misdemeanors or felonies
+    count under this rule. 
 
     Args:
         crecord: A criminal record
@@ -130,7 +131,7 @@ def ten_years_since_last_conviction(crecord: CRecord) -> Decision:
         case
         for case in crecord.cases
         for charge in case.charges
-        if charge.is_conviction()
+        if charge.is_conviction() and charge.grade_GTE("M3")
     ]
     if len(convictions) == 0:
         decision.value = True
