@@ -10,6 +10,8 @@ from RecordLib.sourcerecords.parsingutilities import (
     get_text_from_pdf,
     date_or_none,
     money_or_none,
+    word_starting_near,
+    map_line,
 )
 
 logger = logging.getLogger(__name__)
@@ -114,6 +116,72 @@ def parse_charges(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
         Tuple[1] is a list of strings describing errors encountered.
     """
     logger.info("      parsing charges")
+    # First, parse the Charges section to get a list of the charges, type [Charge]
+    charges, errs = parse_charges_section(txt)
+
+    # Second, parse the Dispositions section to find any dispositions.
+    charges_w_dispositions, more_errs = parse_disposition_section(txt)
+    errs.extend(more_errs)
+    # now update the Charges from the [Charge] list with dispositions from the list of dispositions.
+    return charges, errs
+
+
+def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
+    """
+    Take a line from a Charges section. 
+
+    Using the col_dict, a dict of the indexes of the columns in the Charges table,
+    map the pieces of the `line` to the right columns. 
+
+    If it is the first line of a charge, then add this charge to `charges`. 
+
+    If it is a continuation line, add the continuation line to the last charge added to charges.
+    """
+    mapped_line = map_line(line, col_dict)
+    if mapped_line.get("sequence_number") is None:
+        last_charge_added = list(charges.keys())[-1]
+        charges[last_charge_added].update(mapped_line)
+    else:
+        charges[mapped_line.get("sequence_number")] = mapped_line
+
+    return charges
+
+
+def parse_charges_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
+    """
+    Collect a list of the charges described in the Charges section of a docket. 
+    """
+    charges_section_searcher = re.compile(
+        r"(?:.*\s+)CHARGES\s*\n((?P<charges_section>(?:.+\n)+?(?=[A-Z ]+\n))+.*)"
+    )
+    errs = []
+    charges_sections = charges_section_searcher.findall(txt)
+    if len(charges_sections) == 0:
+        errs.append("Could not find a CHARGES section.")
+        return [], errs
+    charges = dict()  # storing charges as a dict, where keys are sequence numbers.
+    for charges_section in charges_sections:
+        # in case, because of page overflows, there are multiple charges sections
+        lines = charges_section.split("\n")
+        header_line = lines[0]
+        col_dict = dict()
+        col_dict["sequence_number"] = find_index_for_pattern("Seq.", header_line)
+        col_dict["grade"] = find_index_for_pattern("Grade", header_line)
+        col_dict["statute"] = find_index_for_pattern("Statute", header_line)
+        col_dict["offense"] = find_index_for_pattern("Statute Description", header_line)
+        col_dict["otn"] = find_index_for_pattern("OTN", header_line)
+        for line in lines[1:]:
+            charges = update_charges_with(line, col_dict, charges)
+
+    return [c for s, c in charges.items()], errs
+
+
+def parse_disposition_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
+    """
+    Parse the disposition section of a docket.
+
+    This will return a list of the charges found in that section.
+    """
     disposition_section_searcher = re.compile(
         r"(?:.*\s+)DISPOSITION SENTENCING/PENALTIES\s*\n(?P<disposition_section>(.+\n+(?=[A-Z ]+))+.*)"
     )
