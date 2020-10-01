@@ -174,9 +174,12 @@ def source_record_info(a_file):
     #  this is hard to get w/out parsing a lot.
 
     # record type
-    if re.search("docket", file_info.raw_text, re.IGNORECASE):
+
+    first_five_lines = "\n".join(file_info.raw_text.split("\n")[0:5])
+
+    if re.search("docket", first_five_lines, re.IGNORECASE):
         file_info.record_type = SourceRecord.RecTypes.DOCKET_PDF
-    elif re.search("summary", file_info.raw_text, re.IGNORECASE):
+    elif re.search("summary", first_five_lines, re.IGNORECASE):
         file_info.record_type = SourceRecord.RecTypes.SUMMARY_PDF
 
     # fetch status
@@ -190,6 +193,11 @@ def source_record_info(a_file):
 
     if file_info.record_type == SourceRecord.RecTypes.SUMMARY_PDF:
         file_info.docket_num = f"Summary({', '.join(docket_numbers)})"
+        max_docket_num_length = SourceRecord._meta.get_field("docket_num").max_length
+        if len(file_info.docket_num) > max_docket_num_length:
+            file_info.docket_num = (
+                file_info.docket_num[0 : (max_docket_num_length - 4)] + "..."
+            )
     elif file_info.record_type == SourceRecord.RecTypes.DOCKET_PDF:
         file_info.docket_num = docket_numbers[0]
 
