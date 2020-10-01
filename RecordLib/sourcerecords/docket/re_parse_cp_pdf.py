@@ -12,6 +12,8 @@ from RecordLib.sourcerecords.parsingutilities import (
     money_or_none,
     word_starting_near,
     map_line,
+    find_pattern,
+    find_index_for_pattern,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,17 +34,6 @@ section_headers = [
     "CASE FINANCIAL INFORMATION",
     "PETITIONER INFORMATION",
 ]
-
-
-def find_pattern(label, pattern, txt, flags=None) -> Tuple[str, List[str]]:
-    if flags is not None:
-        search = re.search(pattern, txt, flags)
-    else:
-        search = re.search(pattern, txt)
-    if search is not None:
-        return search, []
-    else:
-        return None, [f"Could not find {label}"]
 
 
 def parse_person(txt: str) -> Tuple[Person, List[str]]:
@@ -138,7 +129,7 @@ def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
     If it is a continuation line, add the continuation line to the last charge added to charges.
     """
     mapped_line = map_line(line, col_dict)
-    if mapped_line.get("sequence_number") is None:
+    if mapped_line.get("sequence_number") in [None, ""]:
         last_charge_added = list(charges.keys())[-1]
         charges[last_charge_added].update(mapped_line)
     else:
@@ -147,13 +138,22 @@ def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
     return charges
 
 
-def parse_charges_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
+def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
     """
     Collect a list of the charges described in the Charges section of a docket. 
+
+    Args:
+        txt (str): Text that may contain a Charges section listing out
+        criminal charges in a tabular format.
+
+    Returns:
+        A tuple. Item 0 is a dict with the columns of charges filled in, indexed by the
+            sequence number of the charge. 
+            Item 1 is a list of error messages. 
     """
     charges_section_searcher = re.compile(
         r"(?:.*\s+)CHARGES\s*\n((?P<charges_section>(?:.+\n)+?(?=[A-Z ]+\n))+.*)"
-    )
+    )  # TODO - grr - this still has the first line of the next section, like ATTORNEY INFORMATION ...
     errs = []
     charges_sections = charges_section_searcher.findall(txt)
     if len(charges_sections) == 0:
@@ -162,7 +162,7 @@ def parse_charges_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
     charges = dict()  # storing charges as a dict, where keys are sequence numbers.
     for charges_section in charges_sections:
         # in case, because of page overflows, there are multiple charges sections
-        lines = charges_section.split("\n")
+        lines = charges_section[0].split("\n")
         header_line = lines[0]
         col_dict = dict()
         col_dict["sequence_number"] = find_index_for_pattern("Seq.", header_line)
@@ -170,10 +170,12 @@ def parse_charges_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
         col_dict["statute"] = find_index_for_pattern("Statute", header_line)
         col_dict["offense"] = find_index_for_pattern("Statute Description", header_line)
         col_dict["otn"] = find_index_for_pattern("OTN", header_line)
-        for line in lines[1:]:
+        for line in lines[1 : len(lines) - 2]:
+            # Need to trim `lines`. The first line is the header, "Seq.   Grade ...".
+            #  The last line is the header of the next section, "ATTORNEY INFORMATION ...."
             charges = update_charges_with(line, col_dict, charges)
 
-    return [c for s, c in charges.items()], errs
+    return charges, errs
 
 
 def parse_disposition_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:

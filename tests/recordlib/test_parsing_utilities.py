@@ -1,5 +1,9 @@
 import logging
-from RecordLib.sourcerecords.parsingutilities import word_starting_near, map_line
+from RecordLib.sourcerecords.parsingutilities import (
+    word_starting_near,
+    map_line,
+    find_index_for_pattern,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,3 +24,10 @@ def test_map_line():
         "A": "Joe",
         "B": "Smith",
     }
+
+
+def test_find_index_for_pattern():
+    text = "Seq.        Charge       Statute Description"
+    assert find_index_for_pattern("Seq.", text) == 0
+    assert find_index_for_pattern("Statute Description", text) == 25
+    assert find_index_for_pattern("Something else", text) is None

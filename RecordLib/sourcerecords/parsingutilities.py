@@ -1,4 +1,4 @@
-from typing import Union, BinaryIO, Optional
+from typing import Union, BinaryIO, Optional, Tuple, List
 import os
 import re
 import tempfile
@@ -108,4 +108,31 @@ def map_line(line: str, col_dict: dict) -> dict:
     for key, val in col_dict.items():
         mapped[key] = word_starting_near(val, line)
     return mapped
+
+
+def find_index_for_pattern(pattern, txt) -> Optional[int]:
+    """
+    Return the position in `txt` of the pattern `pattern`,
+    or None if the pattern isn't found.
+    """
+    patt = re.compile(pattern)
+    try:
+        return next(patt.finditer(txt)).start()
+    except StopIteration:
+        return None
+
+
+def find_pattern(label, pattern, txt, flags=None) -> Tuple[str, List[str]]:
+    """
+    Find a pattern in the text `txt`. If its not present, return an error message 
+    describing the missing value with `label`. 
+    """
+    if flags is not None:
+        search = re.search(pattern, txt, flags)
+    else:
+        search = re.search(pattern, txt)
+    if search is not None:
+        return search, []
+    else:
+        return None, [f"Could not find {label}"]
 
