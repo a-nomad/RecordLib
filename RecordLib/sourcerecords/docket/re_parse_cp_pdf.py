@@ -115,6 +115,9 @@ def parse_charges(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
     errs.extend(more_errs)
     # now update the Charges from the [Charge] list with dispositions from the list of dispositions.
     charges = update_charges_with_dispositions(charges, charges_w_dispositions)
+
+    # return a list of charges, rather than the {sequence number: Charge} mapping.
+    charges = [chrg for _, chrg in charges.items()]
     return charges, errs
 
 
