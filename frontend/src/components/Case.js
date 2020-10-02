@@ -75,7 +75,7 @@ Case.propTypes = {
   judge: PropTypes.string,
   arrest_date: PropTypes.string,
   disposition_date: PropTypes.string,
-  charges: PropTypes.array.isRequired,
+  charges: PropTypes.array,
   total_fines: PropTypes.number,
   fines_paid: PropTypes.number,
   complaint_date: PropTypes.string,

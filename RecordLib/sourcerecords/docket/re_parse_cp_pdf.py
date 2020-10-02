@@ -247,7 +247,7 @@ def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
             #  The last line is the header of the next section, "ATTORNEY INFORMATION ...."
             charges = update_charges_with(line, col_dict, charges)
 
-    charges = {key: Charge(**val) for key, val in charges.items()}
+    charges = {key: Charge.from_dict(val) for key, val in charges.items()}
     return charges, errs
 
 
