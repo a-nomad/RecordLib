@@ -2,7 +2,7 @@
 Common, simple dataclasses live here.
 """
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import List, Tuple, Optional
 from datetime import date, timedelta
 import re
@@ -125,12 +125,13 @@ class Charge:
     offense: str
     grade: str
     statute: str
-    disposition: str
+    disposition: Optional[str] = None
     disposition_date: Optional[date] = None
     sentences: Optional[List[Sentence]] = None
     sequence: Optional[
         int
     ] = None  # A charge on a docket gets a sequence number. Its like an ID for the charge, within the docket.
+    otn: Optional[str] = None
 
     @staticmethod
     def grade_GTE(grade_a: str, grade_b: str) -> bool:
@@ -205,6 +206,30 @@ class Charge:
 
         reduced = functools.reduce(reducer, charges, [])
         return reduced
+
+    @staticmethod
+    def combine(ch1: Optional[Charge], ch2: Optional[Charge]) -> Charge:
+        """
+        Combine two charges, using the most complete information from both.
+        """
+
+        def pick_more_complete(thing1, thing2):
+            if thing1 in [None, ""]:
+                if isinstance(thing2, str) and len(thing2) > 0:
+                    return thing2
+            return thing1
+
+        if ch1 is None:
+            return ch2
+        if ch2 is None:
+            return ch1
+
+        return Charge(
+            **{
+                field: pick_more_complete(getattr(ch1, field), getattr(ch2, field))
+                for field in fields(ch1)
+            }
+        )
 
     def combine_with(self, charge) -> Charge:
         """

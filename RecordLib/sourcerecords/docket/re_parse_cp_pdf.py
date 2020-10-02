@@ -4,7 +4,7 @@ Regex parsing functions for Common Pleas pdf dockets.
 
 import logging
 import re
-from typing import Union, BinaryIO, Tuple, List, Optional
+from typing import Union, BinaryIO, Tuple, List, Optional, Dict
 from RecordLib.crecord import Charge, Person, Case, Address
 from RecordLib.sourcerecords.parsingutilities import (
     get_text_from_pdf,
@@ -114,7 +114,34 @@ def parse_charges(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
     charges_w_dispositions, more_errs = parse_disposition_section(txt)
     errs.extend(more_errs)
     # now update the Charges from the [Charge] list with dispositions from the list of dispositions.
+    breakpoint()
+    charges = update_charges_with_dispositions(charges, charges_w_dispositions)
     return charges, errs
+
+
+def update_charges_with_dispositions(
+    charges: Dict[int, Charge], charges_w_dispositions: Dict[int, Charge]
+) -> Dict[int, Charge]:
+    """
+    Update a dictionary of Charges information with disposition information from the Disposition section.
+
+
+
+    Args:
+        charges (dict): A dictionary mapping sequence numbers to Charge objects
+        charges_w_dispositions (dict): A dictionary mapping sequence numbers to Charge objects.
+    """
+    # need all the keys from both charges and charges_w_dispositions, in case there's a sequence either parser misses.
+    all_sequences = set(
+        k for k in list(charges.keys()) + list(charges_w_dispositions.keys())
+    )
+    all_charges = dict()
+    for seq_num in all_sequences:
+        all_charges[seq_num] = Charge.combine(
+            charges.get(seq_num), charges_w_dispositions.get(seq_num)
+        )
+    # and need to update these keys with the most complete info from either dict.
+    return all_charges
 
 
 def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
@@ -129,13 +156,14 @@ def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
     If it is a continuation line, add the continuation line to the last charge added to charges.
     """
     mapped_line = map_line(line, col_dict)
-    if mapped_line.get("sequence_number") in [None, ""]:
+    if mapped_line.get("sequence") in [None, ""]:
         last_charge_added = list(charges.keys())[-1]
         update_charge_dict(charges[last_charge_added], mapped_line)
     else:
-        charges[mapped_line.get("sequence_number")] = mapped_line
+        charges[mapped_line.get("sequence")] = mapped_line
 
     return charges
+
 
 def update_charge_dict(charge_dict, update_dict):
     """
@@ -161,7 +189,7 @@ def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
             Item 1 is a list of error messages. 
     """
     charges_section_searcher = re.compile(
-        r"(?:.*\s+)CHARGES\s*\n((?P<charges_section>(?:.+\n)+?(?=[A-Z ]+\n))+.*)"
+        r"(?:.*\s+)CHARGES\s*\n((?P<charges_section>(?:.+\n)+?(?=[A-Z\/ ]+\n))+.*)"
     )  # TODO - grr - this still has the first line of the next section, like ATTORNEY INFORMATION ...
     errs = []
     charges_sections = charges_section_searcher.findall(txt)
@@ -174,25 +202,44 @@ def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
         lines = charges_section[0].split("\n")
         header_line = lines[0]
         col_dict = dict()
-        col_dict["sequence_number"] = find_index_for_pattern("Seq.", header_line)
-        col_dict["grade"] = find_index_for_pattern("Grade", header_line)
-        col_dict["statute"] = find_index_for_pattern("Statute", header_line)
-        col_dict["offense"] = find_index_for_pattern("Statute Description", header_line)
-        col_dict["otn"] = find_index_for_pattern("OTN", header_line)
+        col_dict["sequence"] = {
+            "idx": find_index_for_pattern("Seq.", header_line),
+            "fmt": int,
+        }
+        col_dict["grade"] = {
+            "idx": find_index_for_pattern("Grade", header_line),
+            "fmt": None,
+        }
+        col_dict["statute"] = {
+            "idx": find_index_for_pattern("Statute", header_line),
+            "fmt": None,
+        }
+        col_dict["offense"] = {
+            "idx": find_index_for_pattern("Statute Description", header_line),
+            "fmt": None,
+        }
+        col_dict["otn"] = {
+            "idx": find_index_for_pattern("OTN", header_line),
+            "fmt": None,
+        }
         for line in lines[1 : len(lines) - 1]:
             # Need to trim `lines`. The first line is the header, "Seq.   Grade ...".
             #  The last line is the header of the next section, "ATTORNEY INFORMATION ...."
-            breakpoint()
             charges = update_charges_with(line, col_dict, charges)
 
+    charges = {key: Charge(**val) for key, val in charges.items()}
     return charges, errs
 
 
-def parse_disposition_section(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
+def parse_disposition_section(
+    txt: str,
+) -> Tuple[Optional[Dict[str, Charge]], List[str]]:
     """
     Parse the disposition section of a docket.
 
-    This will return a list of the charges found in that section.
+    This will return a dict. The keys are sequence numbers of the charges found in that section, and 
+    the values are the last events to happen to the charge with each sequence number
+    (i.e., the final disposition, if any).
     """
     disposition_section_searcher = re.compile(
         r"(?:.*\s+)DISPOSITION SENTENCING/PENALTIES\s*\n(?P<disposition_section>(.+\n+(?=[A-Z ]+))+.*)"
@@ -269,10 +316,13 @@ def parse_disposition_section(txt: str) -> Tuple[Optional[List[Charge]], List[st
                             f"For the offense, {charge.sequence}/ {offense}, we found, but could not parse, the disposition date: {disp_date_search.group('disposition_date')}"
                         )
                 charges.append(charge)
-    charges = Charge.reduce_merge(charges)
+    # A docket tracks multiple charges through a history of changes. We take the list of charges, and then reduce it down to a list of the last events that
+    # happened to each charge.
+    # We also convert this list of charges to a mapping of sequence number -> Charge.
+    charges = {c.sequence: c for c in Charge.reduce_merge(charges)}
     missing_disposition_dates = [
         f"Could not find disposition date for {c.sequence} / {c.offense} with disposition {c.disposition}"
-        for c in charges
+        for _, c in charges.items()
         if c.disposition_date is None
     ]
     errs += missing_disposition_dates

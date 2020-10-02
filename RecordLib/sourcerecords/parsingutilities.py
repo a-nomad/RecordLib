@@ -94,19 +94,26 @@ def map_line(line: str, col_dict: dict) -> dict:
 
     Example: 
     col_dict = {
-        'A': 0,
-        'B': 20,
+        'A': {'idx': 0, 'fmt': None},
+        'B': {'idx': 20, 'fmt': int}
     }
-    line = "Joe                 Smith"
+    line = "Joe                 4"
     map_line(line, col_dict) == {
         'A': 'Joe',
-        'B': 'Smith',
+        'B': 4,
     }
     """
 
     mapped = dict()
     for key, val in col_dict.items():
-        mapped[key] = word_starting_near(val, line)
+        extracted_value = word_starting_near(val["idx"], line)
+        if val["fmt"]:
+            try:
+                extracted_value = val["fmt"](extracted_value)
+            except:
+                pass
+        mapped[key] = extracted_value
+
     return mapped
 
 
