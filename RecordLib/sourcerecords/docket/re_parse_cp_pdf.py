@@ -215,7 +215,7 @@ def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
     charges_sections = charges_section_searcher.findall(txt)
     if len(charges_sections) == 0:
         errs.append("Could not find a CHARGES section.")
-        return [], errs
+        return {}, errs
     charges = dict()  # storing charges as a dict, where keys are sequence numbers.
     for charges_section in charges_sections:
         # in case, because of page overflows, there are multiple charges sections
@@ -268,7 +268,7 @@ def parse_disposition_section(
     disposition_sections = disposition_section_searcher.findall(txt)
     if disposition_section_searcher == []:
         errs.append("Could not find the disposition/sentencing section.")
-        return None, errs
+        return {}, errs
     charges = []
     charges_pattern = r"(?P<sequence>\d)\s+\/\s+(?P<offense>.+)\s{12,}(?P<disposition>\w.+?)(?=\s\s)\s{12,}(?P<grade>\w{0,2})\s+(?P<statute>\w{1,2}\s?\u00A7\s?\d+(\-|\u00A7|\w+)*)"
     # there may be multiple disposition sections
