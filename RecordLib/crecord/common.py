@@ -215,8 +215,8 @@ class Charge:
 
         def pick_more_complete(thing1, thing2):
             if thing1 in [None, ""]:
-                if isinstance(thing2, str) and len(thing2) > 0:
-                    return thing2
+                # this means that None in thing2 would override "" in thing1. Is that good?
+                return thing2
             return thing1
 
         if ch1 is None:

@@ -308,19 +308,21 @@ def parse_disposition_section(
                     sentences=[],  # TODO: re_parse_cp_pdf parser does not collect Sentences yet.
                 )
 
+                disp_date_search_pattern = (
+                    r"(?m)^\s*(\S+\s)+\s+(?P<disposition_date>\d\d/\d\d/\d\d\d\d).*$"
+                )
+                # disp_date_search_pattern = r"(.*)\s(?P<disposition_date>\d{1,2}\/\d{1,2}\/\d{4})"
                 # sometimes a single charge may have multiple successive disposition dates. We need the last one.
                 next_line_index = idx_copy + 1
                 disp_date_search = re.search(
-                    r"(.*)\s(?P<disposition_date>\d{1,2}\/\d{1,2}\/\d{4})",
-                    section_lines[next_line_index],
+                    disp_date_search_pattern, section_lines[next_line_index],
                 )
+                next_line_index += 1
                 while re.search(
-                    r"(.*)\s(?P<disposition_date>\d{1,2}\/\d{1,2}\/\d{4})",
-                    section_lines[next_line_index],
+                    disp_date_search_pattern, section_lines[next_line_index],
                 ):
                     disp_date_search = re.search(
-                        r"(.*)\s(?P<disposition_date>\d{1,2}\/\d{1,2}\/\d{4})",
-                        section_lines[next_line_index],
+                        disp_date_search_pattern, section_lines[next_line_index],
                     )
                     next_line_index += 1
 
