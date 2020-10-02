@@ -226,7 +226,9 @@ class Charge:
 
         return Charge(
             **{
-                field: pick_more_complete(getattr(ch1, field), getattr(ch2, field))
+                field.name: pick_more_complete(
+                    getattr(ch1, field.name), getattr(ch2, field.name)
+                )
                 for field in fields(ch1)
             }
         )

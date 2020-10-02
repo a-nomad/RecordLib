@@ -92,6 +92,22 @@ def map_line(line: str, col_dict: dict) -> dict:
     """
     Map a line of columnar data to the columns described in col_dict.
 
+
+    Args:
+        line (str) : A line of text in a columnar format, like 
+                     "  Some      Text      in     Columns  "
+        col_dict (dict) : A dict describing how to extract the columns. 
+            The dict's keys are the names of each column.
+            The values are a dict with keys "idx" and "fmt". 
+            "idx" is the index of the column's start.
+            "fmt" is either None or a function that should be applied
+            to format the column's value, like 'int' to turn a string
+            into an int.
+
+    Returns:
+        a dict mapping the column names (keys of col_dict) to the appropriate
+        values from the input `line`, formatted using the 'col_dict''s 'fmt' methods.
+
     Example: 
     col_dict = {
         'A': {'idx': 0, 'fmt': None},
@@ -110,7 +126,9 @@ def map_line(line: str, col_dict: dict) -> dict:
         if val["fmt"]:
             try:
                 extracted_value = val["fmt"](extracted_value)
-            except:
+            except (TypeError, ValueError):
+                # 'fmt' isn't callable, so don't try to reformat
+                # the extracted value.
                 pass
         mapped[key] = extracted_value
 

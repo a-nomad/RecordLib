@@ -114,7 +114,6 @@ def parse_charges(txt: str) -> Tuple[Optional[List[Charge]], List[str]]:
     charges_w_dispositions, more_errs = parse_disposition_section(txt)
     errs.extend(more_errs)
     # now update the Charges from the [Charge] list with dispositions from the list of dispositions.
-    breakpoint()
     charges = update_charges_with_dispositions(charges, charges_w_dispositions)
     return charges, errs
 
@@ -146,12 +145,12 @@ def update_charges_with_dispositions(
 
 def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
     """
-    Take a line from a Charges section. 
+    Take a line from a Charges section.
 
     Using the col_dict, a dict of the indexes of the columns in the Charges table,
-    map the pieces of the `line` to the right columns. 
+    map the pieces of the `line` to the right columns.
 
-    If it is the first line of a charge, then add this charge to `charges`. 
+    If it is the first line of a charge, then add this charge to `charges`.
 
     If it is a continuation line, add the continuation line to the last charge added to charges.
     """
@@ -165,13 +164,31 @@ def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
     return charges
 
 
-def update_charge_dict(charge_dict, update_dict):
+def update_charge_dict(
+    charge_dict: Dict[int, Union[str, int]], update_dict: Dict[int, Union[str, int]]
+) -> Dict[int, Union[str, int]]:
     """
     Update a dict describing a charge by appending any non-blank corresponding keys from update_dict.
+
+    This only gets called when `sequence` is blank, indicating that the `update_dict` is describing
+    a continuation of `charge_dict`, and not a separate charge.
+
+    Args:
+        charge_dict (dict): Dictionary mapping sequence numbers to info about a charge.
+        update_dict (dict): Dictionary mapping sequence numbers to info about a charge.
+
+
+    Returns:
+        A dict that extends the string values of `charge_dict` with corresponding continuations in `update_dict`
+
     """
     updated = dict()
     for key, val in charge_dict.items():
-        updated[key] = val + (update_dict[key] if update_dict[key] is not None else "")
+        # If a corresponding key in `update_dict`
+        if isinstance(val, str) and isinstance(update_dict[key], str):
+            updated[key] = val + update_dict[key]
+        else:
+            updated[key] = val
     return updated
 
 
