@@ -131,11 +131,20 @@ def update_charges_with(line: str, col_dict: dict, charges: dict) -> dict:
     mapped_line = map_line(line, col_dict)
     if mapped_line.get("sequence_number") in [None, ""]:
         last_charge_added = list(charges.keys())[-1]
-        charges[last_charge_added].update(mapped_line)
+        update_charge_dict(charges[last_charge_added], mapped_line)
     else:
         charges[mapped_line.get("sequence_number")] = mapped_line
 
     return charges
+
+def update_charge_dict(charge_dict, update_dict):
+    """
+    Update a dict describing a charge by appending any non-blank corresponding keys from update_dict.
+    """
+    updated = dict()
+    for key, val in charge_dict.items():
+        updated[key] = val + (update_dict[key] if update_dict[key] is not None else "")
+    return updated
 
 
 def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
@@ -170,9 +179,10 @@ def parse_charges_section(txt: str) -> Tuple[dict, List[str]]:
         col_dict["statute"] = find_index_for_pattern("Statute", header_line)
         col_dict["offense"] = find_index_for_pattern("Statute Description", header_line)
         col_dict["otn"] = find_index_for_pattern("OTN", header_line)
-        for line in lines[1 : len(lines) - 2]:
+        for line in lines[1 : len(lines) - 1]:
             # Need to trim `lines`. The first line is the header, "Seq.   Grade ...".
             #  The last line is the header of the next section, "ATTORNEY INFORMATION ...."
+            breakpoint()
             charges = update_charges_with(line, col_dict, charges)
 
     return charges, errs
