@@ -160,7 +160,7 @@ def integrate_summaries(
     find any cases that the summary sheets mention which are not already in the criminal record. 
     
     For these extra cases, find a docket sheet for this case, and add it as a source record and integrate its information
-    into the criminal record. 
+    into the criminal record.
     """
     dockets_in_summaries = []
     for summary_source_record in summary_source_records:
