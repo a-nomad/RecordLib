@@ -204,15 +204,23 @@ def csv(input_data: str, output: str, num: int):
     check_exists(input_data)
     check_exists(output)
     counter = 0
+    toscreen = []
     with open(input_data, "r") as f:
         reader = DictReader(f)
         for row in reader:
             first_name = row["first_name"]
             last_name = row["last_name"]
+            dob = row["dob"]
+            # the data seems to have lots of duplicates, so lets remove those to avoid screening the same person multiple times.
+            to_add = (first_name, last_name, dob)
+            if to_add not in toscreen:
+                toscreen.append(to_add)
+
+        for (first_name, last_name, dob) in toscreen:
             __name(
                 first_name,
                 last_name,
-                row["dob"],
+                dob,
                 date_format=r"%Y-%m-%d",
                 output_json=None,
                 output_dir=None,
@@ -224,3 +232,4 @@ def csv(input_data: str, output: str, num: int):
                 counter += 1
                 if counter >= num:
                     break
+
