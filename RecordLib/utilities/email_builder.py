@@ -135,7 +135,7 @@ class EmailBuilder:
             # then the date-of-last-conviction cant be the only reason the case isn't sealable.
             return None
 
-        ten_years_decision = ssr.ten_years_since_last_conviction(crecord)
+        ten_years_decision = ssr.ten_years_since_last_conviction_for_m_or_f(crecord)
         if bool(ten_years_decision) is True:
             # This record passes the ten years since conviction requirement, so
             # that rule is not what's preventing this case from being sealable.
