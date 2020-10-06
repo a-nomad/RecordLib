@@ -261,6 +261,9 @@ class Charge:
 
         There are lots of different dispositions, and this helps identify if a disp. counts as a conviction or not.
         """
+        if self.disposition is None:
+            logger.warn("No disposition.")
+            return False
         if re.match("^Guilty", self.disposition.strip()):
             return True
         else:

@@ -1,4 +1,3 @@
-
 <%namespace name="defs" file="defs.html"/>
 <%inherit file="base.html"/>
 <%block name='record_found_or_not'>
@@ -12,11 +11,14 @@
     find the legal assistance best able to help you.
 </p>
 <p>
-    Our automated system found ${ len(analysis.record.cases) } cases when searching your information. 
-    It appears that ${num_cases_cleared['num_charges']} charges, from ${num_cases_cleared['num_cases']} cases could be removed from your record by filing a petition
-    or through automated sealing. 
+    Our automated system used the following information to search for public court records about you:
 </p>
-% if len(analysis.remaining_record.cases) == 0:
+${defs.write_search_details()}
+<p> The software found ${ len(analysis.record.cases) } cases when searching your information. 
+    It appears that ${num_cases_cleared['num_charges']} charges, from ${num_cases_cleared['num_cases']} cases could be removed from your record by filing a petition
+    or through automated sealing, as long as all fines and costs are paid.
+</p>
+% if len(analysis.remaining_record.cases) != 0:
     <p>
         An additional ${len(analysis.remaining_record.cases)} cases would remain on your record. See the end of the email for information about
         getting legal help to clear your remaining record.
@@ -34,6 +36,5 @@
     <h2> Cases and charges that are not currently eligible for sealing or expungement </h2>
     ${defs.remaining_record(analysis.remaining_record, get_unsealable_until_date)}
 % endif
-    <h2> Finding legal help </h2>
     ${defs.referral_information(counties)}
 </%block>

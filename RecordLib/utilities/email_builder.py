@@ -156,6 +156,18 @@ class EmailBuilder:
         case = cases[0]
         return (case.total_fines or 0) - (case.fines_paid or 0)
 
+    def get_search_details(self):
+        try:
+            crec = self.analysis.record
+            person = crec.person
+            return {
+                "first_name": person.first_name,
+                "last_name": person.last_name,
+                "dob": person.date_of_birth,
+            }
+        except:
+            return {"error": "Something went wrong with the search."}
+
     def html(self) -> str:
         """
         Return an html-formatted string that describes the analysis.
@@ -175,5 +187,6 @@ class EmailBuilder:
             num_cases_cleared=self.get_num_cases_cleared(),
             get_fees_on_case=self.get_fees_on_case,
             get_unsealable_until_date=self.get_unsealable_until_date,
+            search_details=self.get_search_details(),
         )
 

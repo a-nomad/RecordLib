@@ -85,6 +85,15 @@
 </%def>
 
 
+<%def name='write_search_details()'>
+    % if 'error' in search_details.keys():
+        <p><b>${search_details.get("error")}</b></p>
+    % else:
+        <p><b>${search_details.get("first_name")} ${search_details.get("last_name")}, ${search_details.get("dob")} </b></p>
+    % endif
+
+</%def>
+
 <%def name='no_remaining_record()'>
      Our analysis suggests that your entire record is eligible to be cleared or sealed.
 </%def>
@@ -124,14 +133,16 @@
 </%def>
 
 <%def name='referral_information(counties)'>
+
+    <h2> Finding legal help </h2>
     <p> 
         If you would like to speak with a lawyer to get more information about your record, or to help you file any petitions, here are a few resources that might help.
     </p>
     <p>
-        You may qualify for a legal aid organization for assistance if you are low-income. You can find a legal aid organization in your county by visiting 
+        You may qualify for assistance from a legal aid lawyer, depending on your income. You can find a legal aid organization in your county by visiting 
         <a href="https://palegalaid.net/legal-aid-providers-in-pa"> https://palegalaid.net/legal-aid-providers-in-pa </a>. 
-        Others can call the Pennsylvania Bar Association Lawyer Referral Service at 
-        <a href="tel:800-692-7375">(800) 692-7375</a>, Monday through Friday, from 8 AM to 4:30 PM.
+        You may also call the Pennsylvania Bar Association Lawyer Referral Service at 
+        <a href="tel:800-692-7375">(800) 692-7375</a>, Monday through Friday, from 8 AM to 4:30 PM. This service can help you find a qualified lawyer in your area.
     </p>
 </%def>
 
@@ -173,4 +184,3 @@
         </p>
     % endif
 </%def>
-

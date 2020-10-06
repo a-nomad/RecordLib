@@ -1,3 +1,4 @@
+<%namespace name="defs" file="defs.html"/>
 <%inherit file="base.html"/>
 <%block name='record_found_or_not'>
 
@@ -9,8 +10,9 @@
     find the legal assistance best able to help you.
 </p>
 <p> 
-    This is the information we used to search for your record: ______
+    This is the information we used to search for your record: 
 </p>
+${defs.write_search_details()}
 <p> 
     You may still have a criminal record. There are a variety of reason our search may have been unsuccessful. 
 </p>
@@ -18,7 +20,12 @@
     If you would like to look for your own record online, you can:
 </p>
 <p> 
-    If you think you have a criminal record, and would like to get legal assistance about clearing your record, try contacting ____. 
+    If you think you have a criminal record, and would like to get legal assistance about clearing your record, here are a couple ways to find help.
 </p>
-
+<p>
+    You may qualify for assistance from a legal aid lawyer, depending on your income. You can find a legal aid organization in your county by visiting 
+    <a href="https://palegalaid.net/legal-aid-providers-in-pa"> https://palegalaid.net/legal-aid-providers-in-pa </a>. 
+    You may also call the Pennsylvania Bar Association Lawyer Referral Service at 
+    <a href="tel:800-692-7375">(800) 692-7375</a>, Monday through Friday, from 8 AM to 4:30 PM. This service can help you find a qualified lawyer in your area.
+</p>
 </%block>
