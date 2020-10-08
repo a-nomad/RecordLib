@@ -29,8 +29,10 @@ RUN pip install pipenv && pipenv install --system && apt update && \
 RUN mkdir -p /srv/static && \
     mkdir -p /srv/media && \
     mkdir -p /protected && \
+    mkdir -p /mako && \
     chown gunicorn:gunicorn /srv/static && \
     chown gunicorn:gunicorn /srv/media  && \
+    chown gunicorn:gunicorn /mako && \
     chown gunicorn:gunicorn /protected
 
 USER gunicorn

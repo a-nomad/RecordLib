@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "webpack_loader",
     "rest_framework",
+    "django_q",
     "cleanslate",
     "grades",
     "ujs_search",
@@ -85,6 +86,17 @@ CSP_SCRIPT_SRC = (
     "'unsafe-eval'",
 )
 # CSP_INCLUDE_NONCE_IN=['script-src', 'style-src']
+
+
+Q_CLUSTER = {
+    "name": "DjangORM",
+    "workers": 4,
+    "timeout": 90,
+    "retry": 120,
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",
+}
 
 ROOT_URLCONF = "backend.urls"
 
