@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework import permissions, status
+from django_q.tasks import async_task
 from RecordLib.crecord import CRecord
 from RecordLib.sourcerecords import SourceRecord as RLSourceRecord
 from RecordLib.analysis import Analysis
@@ -457,8 +458,8 @@ class AutoScreeningView(APIView):
         """
         screening_request = AutoScreeningSerializer(data=request.data)
         if screening_request.is_valid():
-            cleanslate_screen.by_name(**screening_request.validated_data)
-            return Response({"screening complete"})
+            async_task(cleanslate_screen.by_name, **screening_request.validated_data)
+            return Response({"status": "screening started."})
         else:
-            return Response({"errors": screening_request.errors})
+            return Response({"status": screening_request.errors})
 

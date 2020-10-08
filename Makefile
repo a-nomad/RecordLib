@@ -95,3 +95,8 @@ build-push: build push
 
 .PHONY: build-push-deploy
 build-push-deploy: build push deploy
+
+# When developing locally, reset the superuser in the running docker containers.
+.PHONY: reset-superuser
+reset-superuser:
+	docker exec -ti deployment_django_web_1 python manage.py createsuperuser

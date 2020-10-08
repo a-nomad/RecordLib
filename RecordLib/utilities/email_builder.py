@@ -174,7 +174,7 @@ class EmailBuilder:
         """
         mylookup = TemplateLookup(
             directories=[os.environ["EMAIL_TEMPLATE_DIR"]],
-            module_directory="tmp/mako_modules",
+            module_directory=os.environ["MAKO_MODULE_DIR"],
         )
         if len(self.sourcerecords) > 0:
             base_template = mylookup.get_template("found_record.html")

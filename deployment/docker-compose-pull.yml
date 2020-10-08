@@ -50,6 +50,25 @@ services:
     command: bash -c "python manage.py migrate --noinput && python manage.py init_petitions && python manage.py init_admin"
     depends_on:
       - pg_db
+  django_q:
+    image: natev/recordlibdjango:latest
+    restart: always
+    env_file:
+      - .docker.env
+    environment:
+      - PSQL_HOST=pg_db
+      - MAKO_MODULE_DIR=/mako
+    networks:
+      recordlib-net:
+    command: python manage.py qcluster
+    depends_on:
+      - pg_db
+    volumes:
+      # tmpfs volume for mako's auto-generated modules.
+      - type: volume
+        source: mako
+        target: /mako
+
   pg_db:
     build:
       context: .
@@ -70,3 +89,4 @@ volumes:
   dbdata:
   staticfiles:
   protectedfiles:
+  mako:
